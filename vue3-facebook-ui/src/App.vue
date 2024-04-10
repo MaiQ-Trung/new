@@ -18,5 +18,6 @@ export default {
 <style>
 body {
   background-color: #4b4b4c;
+  overflow-y: scroll;
 }
 </style>
