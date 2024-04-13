@@ -18,6 +18,14 @@ export default {
 <style>
 body {
   background-color: #4b4b4c;
+  margin: 0;
   overflow-y: scroll;
+}
+body::-webkit-scrollbar {
+  width: 10px;
+}
+body::-webkit-scrollbar-thumb {
+  background-color: #e7e7f4;
+  border-radius: 10px;
 }
 </style>
