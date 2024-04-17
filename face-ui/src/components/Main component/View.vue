@@ -3,30 +3,30 @@
   <div class="main-cont">
     <div class="story">
         <div class="story-img">
-            <img src:="imgPath"  class="img1" >
-            <img src:="story1"  class="img2"  >
+            <img :src= "imgPath"  class="img1" >
+            <img :src= "story1"  class="img2"  >
             <h3>Story1</h3>
         </div>
         <div class="story-img">
-            <img src:="imgPath"  class="img1" >
-            <img src:="story2"  class="img2">
+            <img :src="imgPath"  class="img1" >
+            <img :src="story2"  class="img2">
             <h3>Story2</h3>
         </div>
         <div class="story-img">
-            <img src:="imgPath"  class="img1" >
-            <img src:="story3"  class="img2">
+            <img :src="imgPath"  class="img1" >
+            <img :src="story3"  class="img2">
             <h3>Story3</h3>
         </div>
         <div class="story-img">
-            <img src:   ="imgPath"  class="img1">
-            <img src:="story4"  class="img2">
+            <img :src="imgPath"  class="img1">
+            <img :src="story4"  class="img2">
             <h3>Story4</h3>
         </div>
     </div>
     <div class="post">
     <div class="post-side">
         <div class="post-space">
-            <img src:="imgPath"  class="img-p">
+            <img :src="imgPath"  class="img-p">
             <input class="intp" type="text" placeholder="What's in your mind?" />
         </div>
         <div class="post-but">
@@ -55,10 +55,10 @@
   <div class="view">
     <div class="main-view">
         <div class="view-header">
-        <img src:="imgPath" width="50px" height="50px"/>
+        <img :src="imgPath" width="50px" height="50px"/>
         <p1>Mai Quoc Trung</p1>
         </div>
-        <img scr:="story1" width="500px" height="630px"/>
+        <img :src="view1" width="500px" height="630px"/>
         <div class="view-but">
             <button class="int-but" style="border-bottom-left-radius: 10px ;" @click= "toggleClick1" v-show= "!isClick1">
                 <svg xmlns="http://www.w3.org/2000/svg" height="35" width="35" viewBox="0 0 512 512">
@@ -82,10 +82,10 @@
     </div>
     <div class="main-view">
         <div class="view-header">
-        <img src:="imgPath" width="50px" height="50px"/>
+        <img :src="imgPath" width="50px" height="50px"/>
         <p1>Bui Quoc Trung</p1>
         </div>
-        <img scr:="story1" width="500px" height="630px"/>
+        <img :src="view2" width="500px" height="630px"/>
         <div class="view-but">
             <button class="int-but" style="border-bottom-left-radius: 10px ;" @click= "toggleClick2" v-show= "!isClick2">
                 <svg xmlns="http://www.w3.org/2000/svg" height="35" width="35" viewBox="0 0 512 512">
@@ -109,10 +109,10 @@
     </div>
     <div class="main-view">
         <div class="view-header">
-        <img src:="imgPath" width="50px" height="50px"/>
+        <img :src="imgPath" width="50px" height="50px"/>
         <p1>Nathan</p1>
         </div>
-        <img scr:="story1" width="500px" height="630px"/>
+        <img :src="view3" width="500px" height="630px"/>
         <div class="view-but">
             <button class="int-but" style="border-bottom-left-radius: 10px ;" @click= "toggleClick3" v-show= "!isClick3">
                 <svg xmlns="http://www.w3.org/2000/svg" height="35" width="35" viewBox="0 0 512 512">
@@ -139,11 +139,26 @@
 </template>
 
 <script>
+import imgPath from "../Main component/assets/Images/face icon.webp";
+import story1 from "../Main component/assets/Images/story1.jpg";
+import story2 from "../Main component/assets/Images/story2.jpg";
+import story3 from "../Main component/assets/Images/story3.jpg";
+import story4 from "../Main component/assets/Images/story4.jpg";
+import view1 from "../Main component/assets/Images/view-pic.jpg";
+import view2 from "../Main component/assets/Images/vi-pic.jpg";
+import view3 from "../Main component/assets/Images/view-p.jpg";
+
 export default {
     data() {
         return {
-            imgPath: require("./assets/Images/face icon.webp"),
-            story1: require("./assets/Images/story1.jpg"),
+            imgPath,
+            story1,
+            story2,
+            story3,
+            story4,
+            view1,
+            view2,
+            view3,
             isClick1: false,
             isClick2: false,
             isClick3: false,

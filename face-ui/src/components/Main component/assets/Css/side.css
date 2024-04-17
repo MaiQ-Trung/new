@@ -76,6 +76,7 @@
       color: white;
       font-size: 20px;
       border-radius: 10px;
+      margin-left: 15px; 
   }
   .dropitem:hover {
       transition: 0.4s;
