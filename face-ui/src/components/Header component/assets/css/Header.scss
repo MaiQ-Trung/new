@@ -1,0 +1,11 @@
+.header{
+    display: grid;
+    grid-template-columns: 508px 508px 508px;
+    justify-content: center;
+    align-items: center;
+    height: 70px;
+    width: 1525px;
+    background-color: #313131;
+    position: fixed;
+    z-index: 2;
+  }
