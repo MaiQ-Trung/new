@@ -1,0 +1,10 @@
+export const SIGNUP_ACTION = '[action] signup user';
+export const LOGIN_ACTION = '[action] login user';
+export const AUTH_ACTION = '[action] do user auth';
+export const AUTO_LOGIN_ACTION = '[action] auth auto Login';
+// export const AUTO_LOGOUT_ACTION = '[action] auth auto Logout';
+export const LOGOUT_ACTION = '[action] logout user';
+export const SET_USER_TOKEN_DATA_MUTATION = '[mutation] set user token data';
+export const LOADING_BAR_SHOW_MUTATION = '[mutation] show loading bar';
+export const GET_USER_TOKEN_GETTER = '[getters] auth user token';
+export const IS_USER_AUTHENTICATED_GETTER = '[getters] is user authenticated';
