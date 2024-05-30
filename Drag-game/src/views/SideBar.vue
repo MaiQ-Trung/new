@@ -1,19 +1,26 @@
 <!-- SideBar.vue -->
 <script setup>
+import { computed } from "vue";
+import {  useStore } from "vuex";
 
-import { useStore } from "../store/store.js";
-
-const { sidebarItems } = useStore();
-
-
-
+const store = useStore();
+const sidebarItems = computed({
+  get: () => store.state.sidebarItems,
+  set: (data) => store.commit("update", data),
+});
+// const filteredSidebarItems = computed(() => {
+//   const searchKeyword = store.state.searchKeyword.toLowerCase();
+//   const temp = store.state.sidebarItems;
+//   return temp?.filter((item) => {
+//     return item.name.toLowerCase().includes(searchKeyword);
+//   });
+// });
 const startDrag = (event, item) => {
   event.dataTransfer.dropEffect = "copy";
   event.dataTransfer.effectAllowed = "copy";
   event.dataTransfer.setData("itemID", item.id);
   event.dataTransfer.setData("from", "sidebar");
 };
-
 </script>
 
 <template>
@@ -29,7 +36,7 @@ const startDrag = (event, item) => {
         :key="item.id"
         class="drag-el"
         @dragstart="startDrag($event, item)"
-        @draggable="true"
+        :draggable="true"
       >
         <div class="name-container">
           <img :src="item.image" :alt="`Image for ${item.id}`" />

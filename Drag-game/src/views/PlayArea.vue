@@ -1,17 +1,23 @@
+<!-- PlayArea.vue -->
 <script setup>
-import { useStore } from "../store/store.js";
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect,computed } from "vue";
 import combinations from "@/data/combinations.js";
+import { useStore } from "vuex";
 
-const { sidebarItems,addCombinationToSidebar } = useStore();
-
+const store = useStore();
+const sidebarItems = store.state.sidebarItems;
 const isDropOpen = ref(false);
 const playAreaItems = ref([]);
-const addedToSidebar = ref(false);
 
 const addItemToPlayArea = (item) => {
   playAreaItems.value.push({ ...item, id: Date.now() });
 };
+
+const setSearchKeyword = (keyword) => {
+  store.commit('updateSearchKeyword', keyword);
+};
+
+
 const mouseX = ref(0);
 const mouseY = ref(0);
 const selectedItem = ref(null);
@@ -119,7 +125,7 @@ const onDrop = (event) => {
     const dropZone = event.currentTarget.getBoundingClientRect();
     const dropX = event.clientX - dropZone.left;
     const dropY = event.clientY - dropZone.top;
-    const item = sidebarItems.value.find((item) => item.id === itemId);
+    const item = sidebarItems.find((item) => item.id === itemId);
     if (item) {
       const newItem = {
         ...item,
@@ -130,6 +136,7 @@ const onDrop = (event) => {
       highestZIndex.value += 1;
       addItemToPlayArea(newItem);
     }
+    console.log(playAreaItems.value);
   }
   const HandleCombination = () => {
     combinations;
@@ -153,21 +160,17 @@ const onDrop = (event) => {
             if (distance <= 50) {
               playAreaItems.value.splice(i, 1);
               playAreaItems.value.splice(j - 1, 1);
-
-              const existingItem = sidebarItems.value.find(
-                (item) => item.name === combination.result
-              );
-              if (!existingItem) {
-                console.log(sidebarItems);
-                // Nếu không tồn tại, thêm newElement vào sidebarItems
-                sidebarItems.value.push({
-                  id: combination.id, // Bạn có thể gán id mới cho newElement tại đây
-                  name: combination.result,
-                  image: combination.image,
-                });
-              }
+              const item = {
+                id: combination.id,
+                name: combination.result,
+                image: combination.image,
+              };
+              store.dispatch({
+                type: "updateSidebarItems",
+                item: item,
+              });
               const newElement = {
-                id: combination.id++,
+                id: combination.id,
                 name: combination.result,
                 image: combination.image,
                 x: (element1.x + element2.x) / 2,
@@ -217,7 +220,7 @@ const onDrop = (event) => {
     <ul>
       <div class="dropdown-menu" v-show="isDropOpen">
         <button class="dropitem">
-          <input type="text" placeholder="Search..." />
+          <input type="text" v-model="$store.state.searchKeyword" @input="setSearchKeyword($event.target.value)" placeholder="Search...">
         </button>
         <button class="close" @click="toggleDrop">
           <i class="fa-solid fa-x fa-2xl" style="color: #ffd43b"></i>
