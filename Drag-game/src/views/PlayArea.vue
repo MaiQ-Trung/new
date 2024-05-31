@@ -1,22 +1,35 @@
 <!-- PlayArea.vue -->
 <script setup>
-import { ref, watchEffect,computed } from "vue";
+import { ref, watchEffect, computed, onMounted } from "vue";
 import combinations from "@/data/combinations.js";
 import { useStore } from "vuex";
 
 const store = useStore();
-const sidebarItems = store.state.sidebarItems;
+const sidebarItems = computed(() => store.state.sidebarItems);
+
+
 const isDropOpen = ref(false);
-const playAreaItems = ref([]);
+const playAreaItems = ref(
+  JSON.parse(localStorage.getItem("playAreaItems")) || []
+);
+
+const clearPlayArea = () => {
+  playAreaItems.value = [];
+  localStorage.removeItem("playAreaItems");
+};
+
+const isItemExistInSidebar = (itemName) => {
+  return sidebarItems.value.some((item) => item.name === itemName);
+};
 
 const addItemToPlayArea = (item) => {
   playAreaItems.value.push({ ...item, id: Date.now() });
+  localStorage.setItem('playAreaItems', JSON.stringify(playAreaItems.value));
 };
 
 const setSearchKeyword = (keyword) => {
-  store.commit('updateSearchKeyword', keyword);
+  store.commit("updateSearchKeyword", keyword);
 };
-
 
 const mouseX = ref(0);
 const mouseY = ref(0);
@@ -54,15 +67,6 @@ const handleMouseDown = (event) => {
 
   // Store the selected item's id
   selectedItemId.value = Number(selectedItem.value.dataset.id);
-
-  // Update the z-index to bring the selected item to the top
-  const item = playAreaItems.value.find(
-    (item) => item.id === selectedItemId.value
-  );
-  if (item) {
-    highestZIndex.value += 1;
-    item.zIndex = highestZIndex.value;
-  }
 
   // Add mouse move and mouse up event listeners
   document.addEventListener("mousemove", handleMouseMove);
@@ -125,7 +129,8 @@ const onDrop = (event) => {
     const dropZone = event.currentTarget.getBoundingClientRect();
     const dropX = event.clientX - dropZone.left;
     const dropY = event.clientY - dropZone.top;
-    const item = sidebarItems.find((item) => item.id === itemId);
+    const item = sidebarItems.value.find((item) => item.id === itemId);
+
     if (item) {
       const newItem = {
         ...item,
@@ -136,8 +141,8 @@ const onDrop = (event) => {
       highestZIndex.value += 1;
       addItemToPlayArea(newItem);
     }
-    console.log(playAreaItems.value);
   }
+
   const HandleCombination = () => {
     combinations;
     for (let i = 0; i < playAreaItems.value.length; i++) {
@@ -161,25 +166,31 @@ const onDrop = (event) => {
               playAreaItems.value.splice(i, 1);
               playAreaItems.value.splice(j - 1, 1);
               const item = {
-                id: combination.id,
+                id: combination.id++,
                 name: combination.result,
                 image: combination.image,
               };
-              store.dispatch({
-                type: "updateSidebarItems",
-                item: item,
-              });
+              if (!isItemExistInSidebar(item.name)) {
+                store.dispatch({
+                  type: "updateSidebarItems",
+                  item: item,
+                });
+              }
               const newElement = {
-                id: combination.id,
+                id: combination.id++,
                 name: combination.result,
                 image: combination.image,
                 x: (element1.x + element2.x) / 2,
                 y: (element1.y + element2.y) / 2,
                 zIndex: highestZIndex.value + 1,
               };
-
+              console.log(sidebarItems.value);
               highestZIndex.value += 1;
               playAreaItems.value.push(newElement);
+              localStorage.setItem(
+                "playAreaItems",
+                JSON.stringify(playAreaItems.value)
+              );
               return;
             }
           }
@@ -191,11 +202,21 @@ const onDrop = (event) => {
     HandleCombination();
   });
 };
+
+onMounted(() => {
+  const storedSidebarItems = JSON.parse(localStorage.getItem('sidebarItems'));
+  if (storedSidebarItems) {
+    store.commit('setSidebarItems', storedSidebarItems);
+  }
+});
+watchEffect(() => {
+  localStorage.setItem('sidebarItems', JSON.stringify(sidebarItems.value));
+});
 </script>
 
 <template>
   <div class="drop-zone" @drop="onDrop" @dragenter.prevent @dragover.prevent>
-    <button class="clean">
+    <button class="clean" @click="clearPlayArea">
       <i
         class="fa-solid fa-brush fa-rotate-180 fa-2xl"
         style="color: #ffd43b"
@@ -220,7 +241,12 @@ const onDrop = (event) => {
     <ul>
       <div class="dropdown-menu" v-show="isDropOpen">
         <button class="dropitem">
-          <input type="text" v-model="$store.state.searchKeyword" @input="setSearchKeyword($event.target.value)" placeholder="Search...">
+          <input
+            type="text"
+            v-model="$store.state.searchKeyword"
+            @input="setSearchKeyword($event.target.value)"
+            placeholder="Search..."
+          />
         </button>
         <button class="close" @click="toggleDrop">
           <i class="fa-solid fa-x fa-2xl" style="color: #ffd43b"></i>
@@ -306,7 +332,7 @@ input {
   height: 100%;
   background-color: rgb(38, 0, 38);
   padding: 10px;
-  margin: 50%;
+  margin-left: 50%;
 }
 
 .search {

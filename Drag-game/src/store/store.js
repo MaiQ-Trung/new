@@ -1,9 +1,8 @@
-// store.js
 import { createStore } from "vuex";
 
 const store = createStore({
   state: {
-    sidebarItems: [
+    sidebarItems: JSON.parse(localStorage.getItem("sidebarItems")) || [
       {
         id: 0,
         name: "Water",
@@ -16,7 +15,7 @@ const store = createStore({
       },
       {
         id: 2,
-        name: "Earth",
+        name: "Earth",          
         image: "https://littlealchemy.com/hints/icons-png/3.png",
       },
       {
@@ -28,11 +27,16 @@ const store = createStore({
     searchKeyword: "",
   },
   mutations: {
-    updateSidebarItems(state, items) {
-      state.sidebarItems = items;
+    updateSidebarItems(state, item) {
+      const index = state.sidebarItems.findIndex(i => i.id === item.id);
+      if (index !== -1) {
+        state.sidebarItems.splice(index, 1, item);
+      } else {
+        state.sidebarItems.push(item);
+      }
     },
-    update(state, data) {
-      state.sidebarItems = data;
+    setSidebarItems(state, items) {
+      state.sidebarItems = items;
     },
     updateSearchKeyword(state, keyword) {
       state.searchKeyword = keyword;
@@ -40,7 +44,7 @@ const store = createStore({
   },
   actions: {
     updateSidebarItems(context, payload) {
-      context.commit("updateSidebarItems", payload);
+      context.commit("updateSidebarItems", payload.item);
     },
   },
 });

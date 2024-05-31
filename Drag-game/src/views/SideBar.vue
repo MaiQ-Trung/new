@@ -4,17 +4,14 @@ import { computed } from "vue";
 import {  useStore } from "vuex";
 
 const store = useStore();
-const sidebarItems = computed({
-  get: () => store.state.sidebarItems,
-  set: (data) => store.commit("update", data),
+
+const sidebarItems = computed(() => store.state.sidebarItems);
+const filteredSidebarItems = computed(() => {
+  const searchKeyword = store.state.searchKeyword.toLowerCase();
+  return sidebarItems.value.filter((item) => {
+    return item.name.toLowerCase().includes(searchKeyword);
+  });
 });
-// const filteredSidebarItems = computed(() => {
-//   const searchKeyword = store.state.searchKeyword.toLowerCase();
-//   const temp = store.state.sidebarItems;
-//   return temp?.filter((item) => {
-//     return item.name.toLowerCase().includes(searchKeyword);
-//   });
-// });
 const startDrag = (event, item) => {
   event.dataTransfer.dropEffect = "copy";
   event.dataTransfer.effectAllowed = "copy";
@@ -32,14 +29,14 @@ const startDrag = (event, item) => {
   >
     <div class="drop-zone">
       <div
-        v-for="item in sidebarItems"
+        v-for="item in filteredSidebarItems "
         :key="item.id"
         class="drag-el"
         @dragstart="startDrag($event, item)"
         :draggable="true"
       >
         <div class="name-container">
-          <img :src="item.image" :alt="`Image for ${item.id}`" />
+          <img :src="item.image" />
           <div class="item-name">{{ item.name }}</div>
         </div>
       </div>
