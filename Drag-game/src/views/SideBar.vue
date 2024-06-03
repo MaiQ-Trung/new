@@ -50,6 +50,10 @@ const startDrag = (event, item) => {
   background-color: rgb(56, 0, 40);
   padding: 10px;
   border-left: 3px solid rgb(76, 30, 63);
+  overflow: auto;
+}
+.side-container::-webkit-scrollbar {
+  display: none;
 }
 
 .drop-zone {

@@ -6,7 +6,7 @@ import { useStore } from "vuex";
 
 const store = useStore();
 const sidebarItems = computed(() => store.state.sidebarItems);
-
+const showModal = ref(false);
 
 const isDropOpen = ref(false);
 const playAreaItems = ref(
@@ -17,6 +17,15 @@ const clearPlayArea = () => {
   playAreaItems.value = [];
   localStorage.removeItem("playAreaItems");
 };
+const ResetProgress = () => {
+  playAreaItems.value = [];
+  sidebarItems.value.splice(4, sidebarItems.value.length);
+  showModal.value = false;
+};
+
+const cancelReset = () => {
+  showModal.value = false;
+};
 
 const isItemExistInSidebar = (itemName) => {
   return sidebarItems.value.some((item) => item.name === itemName);
@@ -24,7 +33,7 @@ const isItemExistInSidebar = (itemName) => {
 
 const addItemToPlayArea = (item) => {
   playAreaItems.value.push({ ...item, id: Date.now() });
-  localStorage.setItem('playAreaItems', JSON.stringify(playAreaItems.value));
+  localStorage.setItem("playAreaItems", JSON.stringify(playAreaItems.value));
 };
 
 const setSearchKeyword = (keyword) => {
@@ -204,13 +213,13 @@ const onDrop = (event) => {
 };
 
 onMounted(() => {
-  const storedSidebarItems = JSON.parse(localStorage.getItem('sidebarItems'));
+  const storedSidebarItems = JSON.parse(localStorage.getItem("sidebarItems"));
   if (storedSidebarItems) {
-    store.commit('setSidebarItems', storedSidebarItems);
+    store.commit("setSidebarItems", storedSidebarItems);
   }
 });
 watchEffect(() => {
-  localStorage.setItem('sidebarItems', JSON.stringify(sidebarItems.value));
+  localStorage.setItem("sidebarItems", JSON.stringify(sidebarItems.value));
 });
 </script>
 
@@ -222,6 +231,16 @@ watchEffect(() => {
         style="color: #ffd43b"
       ></i>
     </button>
+    <button class="clean" @click="showModal = true">
+      <i class="fa-solid fa-rotate fa-2xl" style="color: #ffd43b"></i>
+    </button>
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <p>Do you want to reset your progress?</p>
+        <button @click="ResetProgress" class="modal-action">Yes</button>
+        <button @click="cancelReset" class="modal-action">No</button>
+      </div>
+    </div>
     <div
       v-for="item in playAreaItems"
       :key="item.id"
@@ -239,7 +258,7 @@ watchEffect(() => {
       <img :src="item.image" :alt="`Image for ${item.id}`" />
     </div>
     <ul>
-      <div class="dropdown-menu" v-show="isDropOpen">
+      <div class="dropdown-menu search-box" v-show="isDropOpen">
         <button class="dropitem">
           <input
             type="text"
@@ -323,6 +342,8 @@ input {
   background-color: rgb(38, 0, 38);
   margin-left: 300%;
   transition: 0.5s ease;
+  position: fixed;
+  right: 220px;
 }
 .close {
   display: flex;
@@ -341,8 +362,9 @@ input {
   height: 80px;
   background-color: rgb(38, 0, 38);
   padding: 10px;
-  margin-left: 90%;
   margin-top: 20px;
+  position: fixed;
+  right: 220px;
 }
 
 .clean {
@@ -356,5 +378,20 @@ input {
 }
 .drag-el:nth-last-of-type(1) {
   margin-bottom: 0;
+}
+
+.modal-content {
+  background-color: #fcc46b;
+  color: #4d4131;
+  margin-top: 13px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.modal-action {
+  background-color: #927de4;
+  margin-right: 20px;
+  border-radius: 7px;
 }
 </style>
