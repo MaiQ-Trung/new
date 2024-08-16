@@ -1,8 +1,5 @@
 import LoginValidation from "@/service/LoginValidation";
 import {
-  SIGNUP_ACTION,
-  LOGIN_ACTION,
-  AUTH_ACTION,
   LOGOUT_ACTION,
   AUTO_LOGIN_ACTION,
   SET_USER_TOKEN_DATA_MUTATION,
@@ -16,6 +13,7 @@ export default {
         token:null,
         email:null,
         userId:null,
+        isLoggedIn:false,
         refreshToken:null,
         expiresIn:null,
     });
@@ -28,7 +26,7 @@ export default {
     });
     return res;
   },
-  async signup({ dispatch,commit }, payload) {
+  async signup({ dispatch }, payload) {
     await dispatch("auth", {
       ...payload,
       url: "http://localhost:3000/signup",
@@ -52,7 +50,7 @@ export default {
 
     try {
       const response = await axios.post(payload.url, postData);
-
+      console.log('API Response:', response.data);
       if (response.status === 200) {
         const tokenData = {
           token: response.data.idToken,
@@ -60,6 +58,7 @@ export default {
           userId: response.data.userId,
           refreshToken: response.data.refreshToken,
           expiresIn: response.data.expiresIn,
+          isLoggedIn: true,
         };
 
         localStorage.setItem("userData", JSON.stringify(tokenData));

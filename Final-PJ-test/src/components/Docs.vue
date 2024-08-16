@@ -1,332 +1,196 @@
 <template>
-  <div class="relative w-[1280px] overflow-y-auto bg-gray-50">
-    <div class="container p-5 w-full h-full">
-      <h2 class="text-2xl font-bold mb-5">Upload File</h2>
+  <div
+    class="relative h-full bg-slate-50 min-h-[640px] max-h-[640px] overflow-auto"
+    @click.stop="showMenu = false"
+  >
+    <div class="container p-5">
+      <h2 class="text-2xl font-bold mb-5">Docs Management</h2>
       <button
-        class="bg-blue-500 text-white px-4 py-2 rounded relative z-10"
-        @click="toggleMenu"
-        aria-haspopup="true"
-        :aria-expanded="showMenu"
+        @click.stop="toggleMenu"
+        class="relative bg-gray-50 text-white px-4 py-2 rounded-lg hover:bg-gray-400 duration-100"
       >
-        New
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="20"
+          width="20"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM200 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"
+          />
+        </svg>
       </button>
+      <!--Menu button for upload, new file, new folder-->
       <div
         v-if="showMenu"
-        class="absolute left-0 p-0 -mt-9 ml-[110px] w-40 bg-white border z-100 border-gray-200 rounded shadow-lg transition-transform duration-300 ease-in-out"
+        class="absolute -mt-9 w-40 bg-white border z-50 border-gray-200 rounded shadow-lg"
       >
-        <button
-          class="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 transition-all duration-300 ease-in-out"
-          @click="toggleModal('file')"
+        <!-- Upload files -->
+        <input
+          type="file"
+          ref="fileInput"
+          @change="onFileChange"
+          class="hidden"
+        />
+        <a
+          href="#"
+          @click="triggerFileInput"
+          class="block px-4 py-2 hover:bg-gray-100 duration-200 ease-in-out"
         >
-          File
-        </button>
-        <hr />
-        <button
-          class="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 transition-all duration-300 ease-in-out"
-          @click="toggleModal('folder')"
+          Upload File
+        </a>
+        <!-- New Folder -->
+        <a
+          href="#"
+          @click="toggleModal"
+          class="block px-4 py-2 hover:bg-gray-100 duration-200 ease-in-out"
         >
-          Folder
-        </button>
-        <hr />
-        <input ref="fileInput" hidden type="file" @change="onFileChange" />
-        <button
-          @click="() => $refs.fileInput.click()"
-          class="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 transition-all duration-300 ease-in-out"
+          Create Folder
+        </a>
+      </div>
+      <!-- Modal for creating a new folder -->
+      <div
+        v-if="showModal"
+        class="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
+      >
+        <div
+          class="bg-white p-4 rounded-lg shadow-lg w-1/3"
+          @keydown.enter="createFolder"
         >
-          Upload
-        </button>
+          <h3 class="text-xl font-bold mb-4">Create New Folder</h3>
+          <input
+            type="text"
+            v-model="newFolderName"
+            placeholder="Folder Name"
+            class="border rounded px-2 py-1 w-full mb-4"
+          />
+          <div class="flex justify-end">
+            <button
+              @click="cancelModal"
+              class="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Cancel
+            </button>
+            <button
+              @click="createFolder"
+              class="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Create
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div
-        class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-        v-if="showModal"
-        aria-modal="true"
-        role="dialog"
-      >
-        <div
-          class="relative p-4 w-full max-w-2xl max-h-full bg-white rounded-lg shadow"
-        >
-          <!-- Modal content -->
-          <div>
-            <!-- Modal header -->
-            <div
-              class="flex items-center justify-between px-4 pt-4 border-b rounded-t"
-            >
-              <h3 class="text-xl font-semibold text-gray-900">
-                Create {{ modalType === "file" ? "File" : "Folder" }}
-              </h3>
-              <button
-                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                @click="toggleModal"
-                aria-label="Close modal"
+      <!--table-->
+      <table class="w-full">
+        <thead>
+          <tr
+            class="text-gray-800 text-xl font-roboto font-semibold grid grid-cols-3 justify-start px-4 py-2 border-b border-gray-500"
+          >
+            <td>Name</td>
+            <td class="ml-48">Latest Change</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="item in filesAndFolders"
+            :key="item.id"
+            class="relative grid grid-cols-3 px-4 py-2 border-b border-gray-500 hover:bg-gray-300 duration-100 cursor-pointer"
+            v-bind:class="{ dragging: item.dragging }"
+            draggable="true"
+            @dragstart="onDragStart(item)"
+            @dragend="onDragEnd(item)"
+            @drop="onDrop(item)"
+            @dragover.prevent
+            @dblclick="HandleDBClick(item)"
+          >
+            <td class="py-2">
+              <span
+                @click="startEditing(item)"
+                class="text-gray-800 text-base font-roboto font-semibold"
+                v-if="editingFileId !== item.id"
+                >{{ item.name }}</span
               >
-                <svg
-                  class="w-3 h-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 14 14"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                  />
-                </svg>
-              </button>
-            </div>
-            <!-- Modal body -->
-            <div class="mt-3">
-              <label class="ml-9 text-sm font-medium text-gray-900">
-                {{
-                  modalType === "file" ? "Your File Name" : "Your Folder Name"
-                }}
-              </label>
               <input
+                v-else
                 type="text"
-                v-model="newFolderName"
-                class="bg-gray-50 border ml-12 border-gray-300 text-gray-900 text-sm rounded-lg block w-10/12 p-2.5"
-                :placeholder="
-                  modalType === 'file' ? 'File Name...' : 'Folder Name...'
-                "
+                v-model="newFileName"
+                @keydown.enter="renameItem(item.id)"
+                @blur="cancelEditing"
+                class="bottom-1 border rounded px-2 py-1"
               />
-            </div>
-            <!-- Modal footer -->
-            <div class="p-4 md:p-5 ml-96 border-gray-200 rounded-b">
-              <button
-                type="button"
-                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                @click="createItem"
-              >
-                Create
-              </button>
-              <button
-                type="button"
-                class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
-                @click="toggleModal"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <br />
-      <div class="mt-5" v-if="!currentFolder">
-        <table class="w-[1230px]">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">Name</th>
-              <th class="px-4 py-2">Latest Change</th>
-              <th class="px-4 py-2">Uploader</th>
-            </tr>
-          </thead>
-          <tbody v-for="(file, index) in uploadedFiles" :key="index">
-            <tr
-              v-if="!file.parent"
-              draggable="true"
-              @dragstart="startDrag($event, file, index)"
-              @dragover.prevent
-              @dragenter.prevent="dragOverItem = index"
-              @dragleave="dragOverItem = null"
-              @drop="onDrop($event, index)"
-              :class="{ 'bg-gray-200': dragOverItem === index }"
-              @dblclick="navigateIntoFolder(file)"
+            </td>
+            <td
+              class="py-2 ml-48 text-gray-800 text-base font-roboto font-semibold"
             >
-              <td class="border-y border-black cursor-pointer">
-                <i :class="`fas ${getFileIcon(file.type)} mr-2`"></i>
-                {{ file.name }}
-              </td>
-              <td class="border-y border-black">{{ file.latestChange }}</td>
-              <td class="border-y border-black">{{ file.uploader }}</td>
-              <td class="border-y border-black py-3">
-                <button @click="downloadFile(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 384 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-                    />
-                  </svg>
-                </button>
-                <button id="delete" @click="deleteFile(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 448 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
-                    />
-                  </svg>
-                </button>
-                <button id="delete" @click="changeFileName(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152V424c0 48.6 39.4 88 88 88H360c48.6 0 88-39.4 88-88V312c0-13.3-10.7-24-24-24s-24 10.7-24 24V424c0 22.1-17.9 40-40 40H88c-22.1 0-40-17.9-40-40V152c0-22.1 17.9-40 40-40H200c13.3 0 24-10.7 24-24s-10.7-24-24-24H88z"
-                    />
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div
-          class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-          v-if="showEditModal"
-          aria-modal="true"
-          role="dialog"
+              {{ new Date(item.updated_at).toLocaleString() }}
+            </td>
+            <td class="flex justify-end mr-28 gap-2">
+              <button
+                v-if="item.type === 'file'"
+                @click="downloadFile(item.id, item.name)"
+                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+              >
+                <i class="pi pi-arrow-circle-down"></i>
+              </button>
+              <button
+                v-if="item.type === 'file'"
+                @click="deleteItem(item.id)"
+                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
+              <button
+                v-if="item.type === 'folder'"
+                @click="deleteItem(item.id)"
+                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Modal xem trước nội dung -->
+  <div
+    v-if="previewFile"
+    class="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center"
+  >
+    <div
+      class="relative top-10 bg-white py-3 px-4 rounded-lg shadow-lg w-3/4 h-[650px] overflow-auto"
+    >
+      <div class="sticky flex flex-row justify-between items-center">
+        <h3 class="text-xl font-bold mb-4">{{ previewFile.name }}</h3>
+        <button
+          @click="closePreview"
+          class="hover:bg-gray-500 mb-4 px-2 py-2 rounded mr-2 duration-150"
         >
-          <div
-            class="relative p-4 w-full max-w-2xl max-h-full bg-white rounded-lg shadow overflow-y-auto"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="20"
+            width="20"
+            viewBox="0 0 24 24"
           >
-            <div>
-              <!-- Modal header -->
-              <div
-                class="flex items-center justify-between px-4 pt-4 border-b rounded-t"
-              >
-                <h3 class="text-xl font-semibold text-gray-900">
-                  Edit {{ isEditable === "word" ? "Word" : "Text" }} File
-                </h3>
-                <button
-                  class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                  @click="toggleEditModal"
-                  aria-label="Close modal"
-                >
-                  <svg
-                    class="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 14"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <!-- Modal body -->
-              <div class="mt-3">
-                <textarea
-                  v-model="editingFileContent"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-4"
-                  rows="10"
-                ></textarea>
-              </div>
-              <!-- Modal footer -->
-              <div class="p-4 md:p-5">
-                <button
-                  type="button"
-                  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                  @click="saveFileContent"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
-                  @click="toggleEditModal"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+          </svg>
+        </button>
       </div>
-      <div v-else>
-        <!-- Hiển thị tên thư mục hiện tại và button quay lại -->
-        <div class="flex items-center mb-3">
-          <button
-            @click="backToParentFolder"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Back
-          </button>
-          <h2 class="text-2xl font-bold ml-5">{{ currentFolder.name }}</h2>
+      <div
+        class="absolute flex justify-center w-full h-full max-w-[1120px] max-h-[570px] overflow-auto rounded-md shadow-2xl backdrop-opacity-45"
+      >
+        <div v-if="previewFile.type === 'text'">
+          {{ previewContent }}
         </div>
-        <!-- Table cho folder con -->
-        <table class="w-[1230px]">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">Name</th>
-              <th class="px-4 py-2">Latest Change</th>
-              <th class="px-4 py-2">Uploader</th>
-            </tr>
-          </thead>
-          <tbody v-for="(file, index) in currentFolder.folder" :key="index">
-            <tr
-              draggable="true"
-              @dragstart="startDrag($event, file, index)"
-              @dragover.prevent
-              @dragenter.prevent="dragOverItem = index"
-              @dragleave="dragOverItem = null"
-              @drop="onDrop($event, index)"
-              :class="{ 'bg-gray-200': dragOverItem === index }"
-            >
-              <td class="border-y border-black cursor-pointer">
-                <i :class="`fas ${getFileIcon(file.type)} mr-2`"></i>
-                {{ file.name }}
-              </td>
-              <td class="border-y border-black">{{ file.latestChange }}</td>
-              <td class="border-y border-black">{{ file.uploader }}</td>
-              <td class="border-y border-black py-3">
-                <button @click="downloadFile(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 384 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-                    />
-                  </svg>
-                </button>
-                <button id="delete" @click="deleteFile(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 448 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"
-                    />
-                  </svg>
-                </button>
-                <button id="delete" @click="changeFileName(index)">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512"
-                    fill="currentColor"
-                    class="bg-slate-50 w-9 h-9 p-2 rounded-xl hover:bg-slate-300 transition-all duration-300 ease-in-out"
-                  >
-                    <path
-                      d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152V424c0 48.6 39.4 88 88 88H360c48.6 0 88-39.4 88-88V312c0-13.3-10.7-24-24-24s-24 10.7-24 24V424c0 22.1-17.9 40-40 40H88c-22.1 0-40-17.9-40-40V152c0-22.1 17.9-40 40-40H200c13.3 0 24-10.7 24-24s-10.7-24-24-24H88z"
-                    />
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <img
+          v-if="previewFile.type === 'image'"
+          :src="previewContent"
+          alt="File Preview"
+          class="flex"
+        />
       </div>
     </div>
   </div>
@@ -334,253 +198,252 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import "@fortawesome/fontawesome-free/css/all.css";
 
 const store = useStore();
-const editingFileIndex = ref(-1);
-const editingFileContent = ref("");
+const router = useRouter();
+const selectedFile = ref(null);
+const filesAndFolders = ref([]);
+const editingFileId = ref(null);
+const newFileName = ref("");
+const fileInput = ref(null);
 const showMenu = ref(false);
 const showModal = ref(false);
-const modalType = ref("");
 const newFolderName = ref("");
-const files = ref([]);
-const uploadedFiles = ref([]);
-const currentFolder = ref(null);
-const showEditModal = ref(false);
-const dragOverItem = ref(null);
-let dragStartIndex = null;
+const previewFile = ref(null);
+const previewContent = ref("");
 
-const navigateIntoFolder = (folder) => {
-  if (folder.type === "folder" && Array.isArray(folder.folder)) {
-    currentFolder.value = folder;
+const HandleDBClick = (item) => {
+  if (item.type === "folder") {
+    navigateToFolder(item);
+  } else {
+    previewItem(item);
   }
 };
 
-const backToParentFolder = () => {
-  currentFolder.value = null;
-};
+// Mở modal xem trước nội dung
+const previewItem = async (item) => {
+  if (item.type === "file") {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/files/${item.id}/preview`,
+        {
+          responseType: "blob", // Để nhận dữ liệu dưới dạng blob
+        }
+      );
 
-const startDrag = (event, file, index) => {
-  dragStartIndex = index;
-  console.log("Drag start:", file);
-};
+      const contentType = response.headers["content-type"];
+      if (contentType.includes("text")) {
+        previewContent.value = await response.data.text();
+      } else if (contentType.includes("image")) {
+        previewContent.value = URL.createObjectURL(response.data);
+      } else {
+        previewContent.value = "Unsupported file type";
+      }
 
-const onDrop = (event, index) => {
-  if (dragStartIndex !== null && index !== null) {
-    const draggedItem = uploadedFiles.value[dragStartIndex];
-    const targetFolder = uploadedFiles.value[index];
-
-    if (draggedItem.type === "folder") {
-      return; // Prevent dropping the folder onto itself
+      previewFile.value = {
+        id: item.id,
+        type: contentType.includes("text")
+          ? "text"
+          : contentType.includes("image")
+          ? "image"
+          : "other",
+        name: item.name,
+      };
+    } catch (error) {
+      console.error("Error previewing file:", error);
     }
-    // Ensure the target is a folder and has a 'folder' array
-    if (targetFolder.type === "folder" && Array.isArray(targetFolder.folder)) {
-      // Add the dragged item to the folder's 'folder' array
-      targetFolder.folder.push(draggedItem);
-      // Remove the dragged item from its original position
-      uploadedFiles.value.splice(dragStartIndex, 1);
-    }
-
-    dragStartIndex = null;
-    dragOverItem.value = null;
-
-    // Update local storage after modification
-    localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
   }
+};
+
+// Đóng modal xem trước
+const closePreview = () => {
+  previewFile.value = null;
+  previewContent.value = "";
 };
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
 };
 
-const toggleModal = (type) => {
-  modalType.value = type;
+const onFileChange = async (event) => {
+  selectedFile.value = event.target.files[0];
+  await uploadFile();
+};
+
+const toggleModal = () => {
   showModal.value = !showModal.value;
-  showMenu.value = false;
 };
 
-const onFileChange = (event) => {
-  files.value = Array.from(event.target.files);
-  uploadFiles();
-};
-
-const isEditable = (file) => {
-  return (
-    file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    file.type === "text/plain"
-  );
-};
-
-const toggleEditModal = (index) => {
-  if (uploadedFiles.value[index]) {
-    editingFileIndex.value = index;
-    editingFileContent.value = uploadedFiles.value[index].content || "";
-  }
-  showEditModal.value = !showEditModal.value;
-};
-
-const saveFileContent = () => {
-  const index = editingFileIndex.value;
-  if (index !== -1 && uploadedFiles.value[index]) {
-    uploadedFiles.value[index].content = editingFileContent.value;
-    localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
-    showEditModal.value = false;
-  }
-  toggleEditModal();
-};
-
-const uploadFiles = () => {
-  const currentTime = new Date().toLocaleString();
-  files.value.forEach((file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const fileDetails = {
-        name: file.name,
-        latestChange: currentTime,
-        uploader: store.state.auth.email,
-        content: e.target.result,
-        type: file.type,
-      };
-      uploadedFiles.value.push(fileDetails);
-      localStorage.setItem(
-        "uploadedFiles",
-        JSON.stringify(uploadedFiles.value)
+const createFolder = async () => {
+  if (newFolderName.value) {
+    const userId = store.state.auth.userId;
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/create-folder/${userId}`,
+        {
+          name: newFolderName.value,
+        }
       );
-      console.log(fileDetails);
-    };
-    reader.readAsDataURL(file);
-  });
-  files.value = [];
+      console.log("Folder created successfully:", response.data);
+      fetchFilesAndFolders(); // Reload files and folders after creating folder
+      newFolderName.value = ""; // Reset folder name
+      toggleModal(); // Close modal
+    } catch (error) {
+      console.error("Error creating folder:", error);
+    }
+  }
 };
 
-const createItem = () => {
-  const currentTime = new Date().toLocaleString();
-  if (!newFolderName.value.trim()) {
-    alert("Name cannot be empty.");
-    return;
+const navigateToFolder = (folder) => {
+  if (folder.type === "folder") {
+    router.push({
+      name: "FolderDetails",
+      params: { folderId: folder.id, folderName: folder.name },
+    });
   }
+};
 
-  let itemType;
-  let itemDetails;
+const cancelModal = () => {
+  newFolderName.value = ""; // Reset folder name
+  toggleModal(); // Close modal
+};
 
-  if (modalType.value === "file") {
-    itemType =
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    itemDetails = {
-      name: newFolderName.value,
-      latestChange: currentTime,
-      uploader: store.state.auth.email,
-      type: itemType,
-    };
-  } else {
-    itemType = "folder";
-    itemDetails = {
-      name: newFolderName.value,
-      latestChange: currentTime,
-      uploader: store.state.auth.email,
-      type: itemType,
-      folder: [],
-    };
+const uploadFile = async () => {
+  if (selectedFile.value) {
+    const formData = new FormData();
+    formData.append("file", selectedFile.value);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/upload/${store.state.auth.userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("File uploaded successfully:", response.data);
+      fetchFilesAndFolders(); // Reload files and folders after uploading
+      selectedFile.value = null; // Reset selected file after upload
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
   }
+};
 
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const fetchFilesAndFolders = async () => {
+  const userId = store.state.auth.userId;
   try {
-    uploadedFiles.value.push(itemDetails);
-    localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
-    newFolderName.value = "";
-    showModal.value = false;
+    const [filesResponse, foldersResponse] = await Promise.all([
+      axios.get(`http://localhost:3000/files/${userId}`),
+      axios.get(`http://localhost:3000/folders/${userId}`),
+    ]);
+    filesAndFolders.value = [
+      ...filesResponse.data.map((file) => ({ ...file, type: "file" })),
+      ...foldersResponse.data.map((folder) => ({ ...folder, type: "folder" })),
+    ];
   } catch (error) {
-    console.error("Failed to create item:", error);
-    alert("An error occurred while creating the item. Please try again.");
-  }
-  console.log(itemDetails);
-};
-
-const deleteFile = (index) => {
-  uploadedFiles.value.splice(index, 1);
-  localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
-};
-const changeFileName = (index) => {
-  const newName = prompt("Enter the new name for the file/folder:");
-  if (newName && newName.trim()) {
-    uploadedFiles.value[index].name = newName.trim();
-    uploadedFiles.value[index].latestChange = new Date().toLocaleString(); // Cập nhật latestChange khi thay đổi tên
-    localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
+    console.error("Error fetching files and folders:", error);
   }
 };
 
-const downloadFile = (index) => {
-  const file = uploadedFiles.value[index];
-  const link = document.createElement("a");
-  link.href = file.content;
-  link.download = file.name;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  uploadedFiles.value[index].latestChange = new Date().toLocaleString();
-  localStorage.setItem("uploadedFiles", JSON.stringify(uploadedFiles.value));
-};
-
-const getFileIcon = (fileType) => {
-  switch (fileType) {
-    case fileType.startsWith("image/png"):
-      return "fa-file-image";
-    case fileType.startsWith("video/"):
-      return "fa-file-video";
-    case fileType.startsWith("audio/"):
-      return "fa-file-audio";
-    case "application/pdf":
-      return "fa-file-pdf";
-    case "application/zip":
-    case "application/x-rar-compressed":
-      return "fa-file-archive";
-    case "application/msword":
-    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-      return "fa-file-text";
-    case "application/vnd.ms-excel":
-    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-      return "fa-file-excel";
-    case "application/vnd.ms-powerpoint":
-    case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-      return "fa-file-powerpoint";
-    case "text/html":
-    case "text/css":
-    case "application/javascript":
-    case "text/javascript":
-    case "application/json":
-    case "application/x-vue":
-    case "application/vnd.angular":
-    case "application/x-react":
-    case "application/nodejs":
-      return "fa-file-code";
-    case "folder":
-      return "fa-folder";
-    default:
-      return "fa-file";
+const deleteItem = async (itemId) => {
+  try {
+    const item = filesAndFolders.value.find((item) => item.id === itemId);
+    if (item.type === "file") {
+      await axios.delete(`http://localhost:3000/files/${itemId}`);
+    } else if (item.type === "folder") {
+      await axios.delete(`http://localhost:3000/folders/${itemId}`);
+    }
+    fetchFilesAndFolders(); // Reload files and folders after deletion
+  } catch (error) {
+    console.error("Error deleting item:", error);
   }
 };
 
-onMounted(() => {
-  const storedFiles = localStorage.getItem("uploadedFiles");
-  if (storedFiles) {
-    uploadedFiles.value = JSON.parse(storedFiles);
+const downloadFile = async (fileId, fileName) => {
+  try {
+    const response = await axios.get(`http://localhost:3000/files/${fileId}`, {
+      responseType: "blob", // Important: return data as blob
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName); // File name when downloading
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+
+    fetchFilesAndFolders();
+  } catch (error) {
+    console.error("Error downloading file:", error);
   }
-});
+};
+
+const startEditing = (item) => {
+  editingFileId.value = item.id;
+  newFileName.value = item.name;
+};
+
+const renameItem = async (itemId) => {
+  if (newFileName.value) {
+    try {
+      const item = filesAndFolders.value.find((item) => item.id === itemId);
+      if (item.type === "file") {
+        await axios.put(`http://localhost:3000/files/${itemId}`, {
+          name: newFileName.value,
+        });
+      } else if (item.type === "folder") {
+        await axios.put(`http://localhost:3000/folders/${itemId}`, {
+          name: newFileName.value,
+        });
+      }
+      fetchFilesAndFolders(); // Reload files and folders after renaming
+      editingFileId.value = null;
+      newFileName.value = "";
+    } catch (error) {
+      console.error("Error renaming item:", error);
+    }
+  }
+};
+
+// Draggable setup
+const onDragStart = (item) => {
+  item.dragging = true;
+};
+
+const onDragEnd = (item) => {
+  item.dragging = false;
+};
+
+const onDrop = async (targetFolder) => {
+  const draggedItem = filesAndFolders.value.find((item) => item.dragging);
+  if (draggedItem && targetFolder.type === "folder") {
+    try {
+      await axios.put("http://localhost:3000/move-file", {
+        fileId: draggedItem.id,
+        folderId: targetFolder.id,
+      });
+      // Xóa file khỏi bảng
+      filesAndFolders.value = filesAndFolders.value.filter(
+        (item) => item.id !== draggedItem.id
+      );
+      fetchFilesAndFolders(); // Reload files and folders after moving file
+    } catch (error) {
+      console.error("Error moving file:", error);
+    }
+  }
+};
+
+onMounted(fetchFilesAndFolders);
 </script>
-
-<style scoped>
-[aria-expanded="true"] .submenu {
-  transform: scaleY(1);
-  transform-origin: top;
-}
-
-[aria-expanded="false"] .submenu {
-  transform: scaleY(0);
-  transform-origin: top;
-}
-
-.drag-over {
-  background-color: #f0f0f0;
-}
-</style>

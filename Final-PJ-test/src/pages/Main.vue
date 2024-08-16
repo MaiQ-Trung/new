@@ -13,17 +13,18 @@ const showComponent = (component, userId = null) => {
 </script>
 
 <template>
-  <div class="flex flex-wrap">
+  <div class="flex">
     <!-- Add the sidebar here -->
     <Sidebar
       @dashboard-click="() => showComponent('Dashboard', userId)"
       @projects-click="() => showComponent('Projects', userId)"
       @calendar-click="() => showComponent('Calendar')"
       @docs-click="() => showComponent('Docs')"
-      @settings-click="() => showComponent('Settings')"      
+      @settings-click="() => showComponent('Settings')"
+      @trash-click="() => showComponent('Trash')"      
     />
     <!-- Main -->
-    <div class="ml-64">
+    <div class=" w-full h-full">
       <router-view />
     </div>
   </div>

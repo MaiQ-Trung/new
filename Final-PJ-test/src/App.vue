@@ -1,29 +1,28 @@
-<script setup>
+<script lang="ts" setup>
 import Navigation from "./components/Navigation.vue";
 import Loader from "./components/Loader.vue";
-import { AUTO_LOGIN_ACTION, IS_USER_AUTHENTICATED_GETTER } from "./store/modules/storeconstans";
+import { AUTO_LOGIN_ACTION } from "./store/modules/storeconstans";
 import { useStore } from "vuex";
-import { computed,onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { computed, onMounted} from "vue";
 
 const store = useStore();
+const router = useRouter();
 const showLoading = computed(() => store.state.showLoading);
-const isAuthenticated = computed(
-  () => store.getters[`auth/${IS_USER_AUTHENTICATED_GETTER}`]
-);
+const isLoggedIn = computed(() => store.state.auth.isLoggedIn);
 
-components: {
-  Navigation;
-  Loader;
-}
 onMounted(() => {
   store.dispatch(`auth/${AUTO_LOGIN_ACTION}`);
 });
+
 </script>
 
 <template>
-  <navigation v-if="!isAuthenticated"></navigation>
-  <loader v-if="showLoading"></loader>
   <div>
-    <router-view></router-view>
+    <navigation v-if="isLoggedIn"></navigation>
+    <loader v-if="showLoading"></loader>
+    <div class="sticky">
+      <router-view></router-view>
+    </div>
   </div>
 </template>

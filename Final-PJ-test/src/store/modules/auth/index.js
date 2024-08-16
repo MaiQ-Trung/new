@@ -9,6 +9,7 @@ const state = () => ({
     userId: '',
     refreshToken: '',
     expiresIn: '',
+    isLoggedIn: false,
     isRegistered: false,
 })
 export default{namespaced: true,state, mutations, getters, actions}

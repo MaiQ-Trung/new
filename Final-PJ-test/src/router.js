@@ -8,8 +8,8 @@ import Calendar from "./components/Calendar.vue";
 import Docs from "./components/Docs.vue";
 import Settings from "./components/Settings.vue";
 import Todolist from "@/components/Todo.vue";
-import { IS_USER_AUTHENTICATED_GETTER } from "./store/modules/storeconstans";
-import store from "./store/modules/store";
+import Trash from "@/components/Trash.vue";
+import FolderDetails from "@/components/FolderDetails.vue";
 
 const routes = [
   { path: "/", component: Login, meta: { auth: false } },
@@ -19,12 +19,18 @@ const routes = [
     path: "/main",
     component: Main,
     children: [
-      { path: "dashboard", name:"dashboard", component: Dashboard },
+      { path: "dashboard", name: "dashboard", component: Dashboard },
       { path: "projects", component: Projects },
       { path: "todo/:projectId", name: "todoList", component: Todolist },
       { path: "calendar", component: Calendar },
       { path: "docs", component: Docs },
+      {
+        path: "/folder/:folderId/:folderName",
+        name: "FolderDetails",
+        component: FolderDetails,
+      },
       { path: "settings", component: Settings },
+      { path: "trash", component: Trash },
     ],
     meta: { auth: true },
   },
@@ -36,20 +42,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  //  if (
-  //    'auth' in to.meta &&
-  //    to.meta.auth &&
-  //    !store.getters[`auth/${IS_USER_AUTHENTICATED_GETTER}`]
-  //  ) {
-  //    next('/login');
-  //  }else if (
-  //    'auth' in to.meta &&
-  //    !to.meta.auth &&
-  //    store.getters[`auth/${IS_USER_AUTHENTICATED_GETTER}`]
-  //  ) {
-  //    next('/dashboard');
-  //  }else{
   next();
-  //  }
 });
+
 export default router;
