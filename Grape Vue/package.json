@@ -12,7 +12,8 @@
     "grapesjs": "^0.21.12",
     "grapesjs-preset-webpage": "^1.0.3",
     "vue": "^3.4.29",
-    "vue3-grapesjs": "^0.0.3"
+    "vue3-grapesjs": "^0.0.3",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
