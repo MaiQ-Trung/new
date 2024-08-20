@@ -9,7 +9,7 @@ function HandleClick(msg) {
 
 <template>
   <div id="app">
-    <!-- <WebBuilder @save="HandleClick"/> -->
-    <Sơđồ />
+    <WebBuilder @save="HandleClick" :default="`<div class='text-block'>Text here...</div>`"/>
+    <!-- <Sơđồ /> -->
   </div>
 </template>

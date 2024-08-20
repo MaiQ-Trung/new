@@ -15,6 +15,14 @@ let editor;
 
 const emits = defineEmits(["save"]);
 
+const props = defineProps({
+  default: {
+    type: String,
+    default: '<div class="text-block">Text here...</div>',
+  },
+});
+
+
 onMounted(() => {
   editor = grapesjs.init({
     container: "#gjs",
@@ -52,7 +60,7 @@ onMounted(() => {
   // Thêm block mới
   editor.BlockManager.add('text', {
     label: 'Text',
-    content: '<div class="text-block">Tuấn</div>',
+    content: props.default,
     category: 'Basic',
     attributes: { class: 'fa fa-font' }
   });
