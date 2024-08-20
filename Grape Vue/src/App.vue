@@ -1,5 +1,6 @@
 <script setup>
 import WebBuilder from './components/WebBuilder.vue';
+import Sơđồ from './components/Sơđồ.vue';
 
 function HandleClick(msg) {
   console.log(msg);
@@ -8,6 +9,7 @@ function HandleClick(msg) {
 
 <template>
   <div id="app">
-    <WebBuilder @save="HandleClick"/>
+    <!-- <WebBuilder @save="HandleClick"/> -->
+    <Sơđồ />
   </div>
 </template>

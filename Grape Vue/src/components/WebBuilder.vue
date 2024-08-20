@@ -64,4 +64,3 @@ function saveAndReload() {
   emits('save', log);
 }
 </script>
-
