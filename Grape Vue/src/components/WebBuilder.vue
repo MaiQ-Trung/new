@@ -13,6 +13,8 @@ import grapesjsPresetWebpage from "grapesjs-preset-webpage";
 
 let editor;
 
+const emits = defineEmits(["save"]);
+
 onMounted(() => {
   editor = grapesjs.init({
     container: "#gjs",
@@ -57,10 +59,9 @@ onMounted(() => {
 });
 
 function saveAndReload() {
-  // Save the changes to storage
   editor.store();
-  console.log(editor.getHtml());
-  // Reload the page to reflect the saved changes
+  const log = editor.getHtml();
+  emits('save', log);
 }
 </script>
 

@@ -1,10 +1,13 @@
 <script setup>
-import { ref } from 'vue';
 import WebBuilder from './components/WebBuilder.vue';
+
+function HandleClick(msg) {
+  console.log(msg);
+}
 </script>
 
 <template>
   <div id="app">
-    <WebBuilder/>
+    <WebBuilder @save="HandleClick"/>
   </div>
 </template>
