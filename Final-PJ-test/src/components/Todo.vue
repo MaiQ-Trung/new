@@ -192,7 +192,10 @@
               class="flex items-center text-gray-800 font-medium justify-between p-2.5 cursor-pointer hover:bg-gray-300 rounded-lg animate-dropdown"
               @click="displayFileDetails(file)"
             >
-              <span>{{ file.name }}</span>
+              <span>
+                <i :class="getFileIcon(file.name)" class="mr-2 text-lg"></i>
+                {{ file.name }}
+              </span>
             </li>
             <div v-else class="flex w-full text-lg text-gray-700 font-semibold underline p-2 rounded-lg justify-center mt-36">No file attached.</div>
           </ul>
@@ -415,7 +418,7 @@ const addItemToList = async (listIndex) => {
       project_id: route.params.projectId,
     };
     try {
-      await axios.post("http://localhost:3000/add-item", newItemObj);
+      await axios.post("http://localhost:3000/add-task", newItemObj);
       highestId.value = newItemObj.id;
       lists.value[listIndex].items.push(newItemObj);
       newItemText.value = "";
@@ -434,7 +437,7 @@ const deleteItem = async (item, listIndex) => {
     lists.value[listIndex].items = lists.value[listIndex].items.filter(
       (i) => i.id !== item.id
     );
-  } catch (error) {
+  } catch (error) { 
     console.error("Error deleting item:", error);
   }
 };
@@ -443,7 +446,7 @@ const deleteItem = async (item, listIndex) => {
 const displayFileDetails = async (file) => {
   try {
     const response = await axios.get(
-      `http://localhost:3000/files/${file.id}/preview`,
+      `http://localhost:3000/file/${file.id}/preview`,
       {
         responseType: "blob", // Để nhận dữ liệu dưới dạng blob
       }
@@ -469,6 +472,39 @@ const displayFileDetails = async (file) => {
     };
   } catch (error) {
     console.error("Error fetching file details:", error);
+  }
+};
+
+const getFileIcon = (fileName) => {
+  const extension = fileName.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return 'pi pi-file-pdf';
+    case 'doc':
+    case 'docx':
+      return 'pi pi-file-word';
+    case 'xls':
+    case 'xlsx':
+      return 'pi pi-file-excel';
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'svg':
+    case'webp':
+    case 'gif':
+      return 'pi pi-image';
+    case 'zip':
+    case 'rar':
+      return 'pi pi-server';
+    case 'txt':
+      return 'pi pi-file';
+    case 'mp4':
+    case 'avi':
+    case 'mkv':
+      return 'pi pi-video';
+    default:
+      return 'pi pi-folder';
   }
 };
 

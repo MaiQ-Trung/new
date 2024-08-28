@@ -5,7 +5,7 @@
       @click.stop="showMenu = false"
     >
       <div class="container p-5">
-        <h2 class="text-2xl font-bold font-roboto mb-5">
+        <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mb-5">
           {{ route.params.folderName }}
         </h2>
         <button
@@ -55,9 +55,11 @@
             <tr
               v-for="item in filesInFolder"
               :key="item.id"
+              @click="toggleModal(item)"
               class="relative grid grid-cols-3 px-4 py-2 border-b border-gray-500 hover:bg-gray-300 duration-100 cursor-pointer"
             >
-              <td class="py-2 ">
+              <td class="py-2 flex items-center">
+                <i :class="getFileIcon(item.name)" class="mr-2 text-lg"></i>
                 <span
                   @click="startEditing(item)"
                   class="text-gray-800 text-base font-roboto font-semibold"
@@ -81,26 +83,67 @@
               <td class="flex justify-end mr-28 gap-2">
                 <button
                   @click="downloadFile(item.id, item.name)"
-                  class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                  class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
                 >
                   <i class="pi pi-arrow-circle-down"></i>
                 </button>
                 <button
                   @click="deleteFile(item.id)"
-                  class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                  class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
                 >
                   <i class="pi pi-trash"></i>
                 </button>
                 <button
                   @click="moveBackFile(item.id)"
-                  class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                  class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
                 >
-                  <RollbackOutlined />
+                  <i class="pi pi-history"></i>
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+    <!--Modal xem truoc file-->
+    <div
+      v-if="previewFile"
+      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center"
+    >
+      <div
+        class="relative top-10 bg-white py-3 px-4 rounded-lg shadow-lg w-3/4 h-[650px] overflow-auto"
+      >
+        <div class="sticky flex flex-row justify-between items-center">
+          <h3 class="text-xl font-bold mb-4">{{ previewFile.name }}</h3>
+          <button
+            @click="closePreview"
+            class="hover:bg-gray-500 mb-4 px-2 py-2 rounded mr-2 duration-150"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="20"
+              width="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="absolute flex justify-center w-full h-full max-w-[1120px] max-h-[570px] overflow-auto rounded-md shadow-2xl backdrop-opacity-45"
+        >
+          <div v-if="previewFile.type === 'text'">
+            {{ previewContent }}
+          </div>
+          <img
+            v-if="previewFile.type === 'image'"
+            :src="previewContent"
+            alt="File Preview"
+            class="flex"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -110,7 +153,6 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
-import { RollbackOutlined } from "@ant-design/icons-vue";
 import store from "@/store/modules/store";
 
 const route = useRoute();
@@ -122,11 +164,90 @@ const fileInput = ref(null);
 const selectedFile = ref(null);
 const editingFileId = ref(null);
 const newFileName = ref("");
+const previewFile = ref(null);
+const previewContent = ref("");
 
+const getFileIcon = (fileName) => {
+  const extension = fileName.split(".").pop().toLowerCase();
+  switch (extension) {
+    case "pdf":
+      return "pi pi-file-pdf";
+    case "doc":
+    case "docx":
+      return "pi pi-file-word";
+    case "xls":
+    case "xlsx":
+      return "pi pi-file-excel";
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "svg":
+    case "webp":
+    case "gif":
+      return "pi pi-image";
+    case "zip":
+    case "rar":
+      return "pi pi-server";
+    case "txt":
+      return "pi pi-file";
+    case "mp4":
+    case "avi":
+    case "mkv":
+      return "pi pi-video";
+    default:
+      return "pi pi-folder";
+  }
+};
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
 };
+
+const toggleModal = async(item) => {
+  await previewItem(item);
+};
+
+const closePreview = () => {
+  previewFile.value = null;
+  previewContent.value = "";
+};
+
+// Api để lấy file preview
+const previewItem = async (item) => {
+  if (item.type === "file") {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/file/${item.id}/preview`,
+        {
+          responseType: "blob", // Để nhận dữ liệu dưới dạng blob
+        }
+      );
+
+      const contentType = response.headers["content-type"];
+      if (contentType.includes("text")) {
+        previewContent.value = await response.data.text();
+      } else if (contentType.includes("image")) {
+        previewContent.value = URL.createObjectURL(response.data);
+      } else {
+        previewContent.value = "Unsupported file type";
+      }
+
+      previewFile.value = {
+        id: item.id,
+        type: contentType.includes("text")
+          ? "text"
+          : contentType.includes("image")
+          ? "image"
+          : "other",
+        name: item.name,
+      };
+      console.log("Previewing file:", previewFile.value);
+    } catch (error) {
+      console.error("Error previewing file:", error);
+    }
+  }
+}
 
 // Api để lấy danh sách file trong folder
 const fetchFilesInFolder = async () => {
@@ -135,7 +256,7 @@ const fetchFilesInFolder = async () => {
       axios.get(`http://localhost:3000/folders/${route.params.folderId}/files`),
     ]);
     filesInFolder.value = filesResponse.data;
-    console.log(route.params)
+    console.log(route.params);
   } catch (error) {
     console.error("Error fetching files or folder:", error);
   }
@@ -174,7 +295,9 @@ const uploadFiles = async () => {
 // Api để trả file về main/docs
 const moveBackFile = async (fileId) => {
   try {
-    await axios.put(`http://localhost:3000/moveback-file/${fileId}/${store.state.auth.userId}`);
+    await axios.put(
+      `http://localhost:3000/moveback-file/${fileId}/${store.state.auth.userId}`
+    );
     fetchFilesInFolder();
   } catch (error) {
     console.error("Error deleting file:", error);
@@ -255,4 +378,3 @@ onMounted(() => {
   fetchFilesInFolder();
 });
 </script>
-

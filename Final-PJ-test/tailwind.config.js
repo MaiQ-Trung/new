@@ -25,7 +25,8 @@ export default {
         "9px": "30px",
       },
       fontFamily: {
-        roboto: ['"Lato"', "sans-serif"],
+        roboto: ['"Roboto"', "sans-serif"],
+        Matemasie: ['"Matemasie"', "sans-serif"],
       },
     },
   },

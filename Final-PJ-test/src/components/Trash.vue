@@ -2,7 +2,7 @@
   <!-- Table -->
   <div class="relative h-dvh bg-slate-50 max-h-dvh overflow-y-auto">
     <div class="container p-5">
-      <h2 class="text-2xl font-bold mb-5">Trash</h2>
+      <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mb-5">Trash</h2>
       <table class="w-full">
         <thead>
           <tr

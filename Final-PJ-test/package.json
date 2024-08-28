@@ -24,6 +24,7 @@
     "express": "^4.19.2",
     "gantt-schedule-timeline-calendar": "^3.37.2",
     "jsonwebtoken": "^9.0.2",
+    "lodash-es": "^4.17.21",
     "primeicons": "^7.0.0",
     "primevue": "^4.0.3",
     "react-beautiful-dnd": "^13.1.1",

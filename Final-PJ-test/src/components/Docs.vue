@@ -4,7 +4,7 @@
     @click.stop="showMenu = false"
   >
     <div class="container p-5">
-      <h2 class="text-2xl font-bold mb-5">Docs Management</h2>
+      <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mb-5">Docs Management</h2>
       <button
         @click.stop="toggleMenu"
         class="relative bg-gray-50 text-white px-4 py-2 rounded-lg hover:bg-gray-400 duration-100"
@@ -104,7 +104,8 @@
             @dragover.prevent
             @dblclick="HandleDBClick(item)"
           >
-            <td class="py-2">
+            <td class="py-2 flex items-center">
+              <i :class="getFileIcon(item.name)" class="mr-2 text-lg"></i>
               <span
                 @click="startEditing(item)"
                 class="text-gray-800 text-base font-roboto font-semibold"
@@ -129,21 +130,21 @@
               <button
                 v-if="item.type === 'file'"
                 @click="downloadFile(item.id, item.name)"
-                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
               >
                 <i class="pi pi-arrow-circle-down"></i>
               </button>
               <button
                 v-if="item.type === 'file'"
                 @click="deleteItem(item.id)"
-                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
               >
                 <i class="pi pi-trash"></i>
               </button>
               <button
                 v-if="item.type === 'folder'"
                 @click="deleteItem(item.id)"
-                class="flex p-2 text-slate-500 text-2xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
+                class="flex p-2 text-slate-500 text-xl rounded-xl hover:bg-slate-200 duration-200 ease-in-out"
               >
                 <i class="pi pi-trash"></i>
               </button>
@@ -215,6 +216,40 @@ const newFolderName = ref("");
 const previewFile = ref(null);
 const previewContent = ref("");
 
+const getFileIcon = (fileName) => {
+  const extension = fileName.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return 'pi pi-file-pdf';
+    case 'doc':
+    case 'docx':
+      return 'pi pi-file-word';
+    case 'xls':
+    case 'xlsx':
+      return 'pi pi-file-excel';
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'svg':
+    case'webp':
+    case 'gif':
+      return 'pi pi-image';
+    case 'zip':
+    case 'rar':
+      return 'pi pi-server';
+    case 'txt':
+      return 'pi pi-file';
+    case 'mp4':
+    case 'avi':
+    case 'mkv':
+      return 'pi pi-video';
+    default:
+      return 'pi pi-folder';
+  }
+};
+
+
 const HandleDBClick = (item) => {
   if (item.type === "folder") {
     navigateToFolder(item);
@@ -228,7 +263,7 @@ const previewItem = async (item) => {
   if (item.type === "file") {
     try {
       const response = await axios.get(
-        `http://localhost:3000/files/${item.id}/preview`,
+        `http://localhost:3000/file/${item.id}/preview`,
         {
           responseType: "blob", // Để nhận dữ liệu dưới dạng blob
         }
@@ -252,6 +287,7 @@ const previewItem = async (item) => {
           : "other",
         name: item.name,
       };
+      console.log("Previewing file:", previewFile.value);
     } catch (error) {
       console.error("Error previewing file:", error);
     }

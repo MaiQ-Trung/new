@@ -12,5 +12,4 @@ export default {
     state.refreshToken = userData.refreshToken;
     state.expiresIn = userData.expiresIn;
   },
-
 };

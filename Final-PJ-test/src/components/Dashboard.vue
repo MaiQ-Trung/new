@@ -141,7 +141,11 @@
                     :key="item.id"
                     class="relative grid grid-cols-3 px-4 py-2 border-b border-gray-500 hover:bg-gray-300 duration-100 cursor-pointer"
                   >
-                    <td class="py-2">
+                    <td class="py-2 flex items-center">
+                      <i
+                        :class="getFileIcon(item.name)"
+                        class="mr-2 text-lg"
+                      ></i>
                       <span
                         class="text-gray-800 text-sm font-roboto font-semibold"
                         >{{ item.name }}</span
@@ -239,6 +243,36 @@ const calendarEvents = ref([]);
 const filesAndFolders = ref([]);
 const DeletedFiles = ref([]);
 
+const getFileIcon = (fileName) => {
+  const extension = fileName.split(".").pop().toLowerCase();
+  switch (extension) {
+    case "pdf":
+      return "pi pi-file-pdf";
+    case "doc":
+    case "docx":
+      return "pi pi-file-word";
+    case "xls":
+    case "xlsx":
+      return "pi pi-file-excel";
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+      return "pi pi-image";
+    case "zip":
+    case "rar":
+      return "pi pi-server";
+    case "txt":
+      return "pi pi-file";
+    case "mp4":
+    case "avi":
+    case "mkv":
+      return "pi pi-video";
+    default:
+      return "pi pi-folder";
+  }
+};
+
 const calendarOptions = reactive({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
   initialView: "dayGridMonth",
@@ -249,7 +283,6 @@ const calendarOptions = reactive({
   },
   events: calendarEvents.value,
 });
-
 
 const fetchData = async () => {
   try {

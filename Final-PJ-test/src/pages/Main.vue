@@ -19,6 +19,7 @@ const showComponent = (component, userId = null) => {
       @dashboard-click="() => showComponent('Dashboard', userId)"
       @projects-click="() => showComponent('Projects', userId)"
       @calendar-click="() => showComponent('Calendar')"
+      @teams-click="() => showComponent('Teams')"
       @docs-click="() => showComponent('Docs')"
       @settings-click="() => showComponent('Settings')"
       @trash-click="() => showComponent('Trash')"      

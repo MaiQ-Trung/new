@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watchEffect } from "vue";
+import { ref, onMounted, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import axios from "axios";
@@ -53,14 +53,10 @@ onMounted(() => {
             href="http://localhost:5173/main/dashboard"
             class="flex ml-2 md:mr-24"
           >
-            <img
-              src="@/assets/logo.png"
-              class="h-12 mr-3"
-              alt="FlowBite Logo"
-            />
+            <img src="@/assets/logo.png" class="h-12 mr-3" />
             <span
-              class="self-center text-white text-xl font-semibold sm:text-2xl whitespace-nowrap"
-              >Flowbite</span
+              class="text-2xl sm:text-3xl text-white font-Matemasie self-center"
+              >Flowy</span
             >
           </a>
         </div>
@@ -100,10 +96,10 @@ onMounted(() => {
                 </p>
               </div>
               <ul class="py-1">
-                <li>
+                <li class="flex flex-row px-4 py-2 items-center gap-2 cursor-pointer font-mono text-gray-700 hover:bg-red-500 hover:text-white duration-150 ease-in-out rounded-lg">
+                  <i class="pi pi-sign-out"></i>
                   <a
                     href="#"
-                    class="block px-4 py-2 font-mono text-gray-700 hover:bg-red-500 hover:text-white duration-150 ease-in-out rounded-lg"
                     role="menuitem"
                     @click.prevent="onLogout()"
                     >Sign out</a

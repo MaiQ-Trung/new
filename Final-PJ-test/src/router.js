@@ -7,6 +7,8 @@ import Projects from "./components/Projects.vue";
 import Calendar from "./components/Calendar.vue";
 import Docs from "./components/Docs.vue";
 import Settings from "./components/Settings.vue";
+import Team from "./components/Team.vue";
+import TeamDetails from "./components/TeamDetails.vue";
 import Todolist from "@/components/Todo.vue";
 import Trash from "@/components/Trash.vue";
 import FolderDetails from "@/components/FolderDetails.vue";
@@ -29,6 +31,8 @@ const routes = [
         name: "FolderDetails",
         component: FolderDetails,
       },
+      {path: "teams", component: Team},
+      {path: "team/:groupId/:groupName", name: "TeamDetail", component: TeamDetails},
       { path: "settings", component: Settings },
       { path: "trash", component: Trash },
     ],
