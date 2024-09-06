@@ -71,7 +71,7 @@ const filteredChildren = computed(() => {
   top: 0;
   left: 50%;
   border-left: 1px solid black;
-  transform: translateX(-50%);
+  transform: translateX(0%);
   width: 1px;
   height: 20px;
 }
