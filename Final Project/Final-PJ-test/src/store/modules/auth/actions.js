@@ -13,7 +13,6 @@ export default {
         token:null,
         email:null,
         userId:null,
-        isLoggedIn:false,
         refreshToken:null,
         expiresIn:null,
     });
@@ -58,7 +57,6 @@ export default {
           userId: response.data.userId,
           refreshToken: response.data.refreshToken,
           expiresIn: response.data.expiresIn,
-          isLoggedIn: true,
         };
 
         localStorage.setItem("userData", JSON.stringify(tokenData));

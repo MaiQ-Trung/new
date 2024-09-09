@@ -407,7 +407,7 @@ const deleteItem = async (itemId) => {
 
 const downloadFile = async (fileId, fileName) => {
   try {
-    const response = await axios.get(`http://localhost:3000/files/${fileId}`, {
+    const response = await axios.get(`http://localhost:3000/download-files/${fileId}`, {
       responseType: "blob", // Important: return data as blob
     });
 
@@ -417,7 +417,6 @@ const downloadFile = async (fileId, fileName) => {
     link.setAttribute("download", fileName); // File name when downloading
     document.body.appendChild(link);
     link.click();
-
     document.body.removeChild(link);
 
     fetchFilesAndFolders();

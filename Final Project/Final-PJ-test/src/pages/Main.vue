@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import Sidebar from "@/components/Sidebar.vue";
+import Navigation from "@/components/Navigation.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -13,6 +14,7 @@ const showComponent = (component, userId = null) => {
 </script>
 
 <template>
+  <Navigation />
   <div class="flex">
     <!-- Add the sidebar here -->
     <Sidebar

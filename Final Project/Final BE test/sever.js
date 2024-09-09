@@ -209,49 +209,62 @@ app.post("/add-project", ensureDbConnection, (req, res) => {
 
 // Endpoint để xóa project
 app.put("/delete-project/:id/:userId", ensureDbConnection, (req, res) => {
-  const { id } = req.params;
+  const { id, userId } = req.params;
 
-  // const deleteItemsQuery = "DELETE FROM todolist WHERE project_id = ?";
-  // db.query(deleteItemsQuery, [id], (err) => {
-  //   if (err) {
-  //     return res
-  //       .status(500)
-  //       .json({ error: "Error deleting items from todolist" });
-  //   }
-  const updateProjectQuery = "UPDATE projects SET user_id=null WHERE id = ?";
+  // Cập nhật project với user_id là null
+  const updateProjectQuery = "UPDATE projects SET user_id = NULL WHERE id = ?";
   db.query(updateProjectQuery, [id], (err) => {
     if (err) {
       return res.status(500).json({ error: err });
     }
+
     // Thực hiện truy vấn SQL để lấy project từ bảng projects có user_id = null
-    const selectProjectsQuery =
-      "SELECT id, name FROM projects WHERE user_id IS NULL";
+    const selectProjectsQuery = "SELECT id, name FROM projects WHERE user_id IS NULL";
     db.query(selectProjectsQuery, (err, results) => {
       if (err) {
         return res.status(500).json({ error: err });
       }
 
-      // Thêm project_id và name của các project có user_id là null vào bảng trash
-      const insertTrashQuery =
-        "INSERT INTO trash (project_id, name, deleted_at, user_id) VALUES ?";
-      const values = results.map((project) => [
-        project.id,
-        project.name,
-        new Date(),
-        req.params.userId,
-      ]);
+      // Kiểm tra xem các project đã tồn tại trong bảng trash chưa
+      const checkTrashQuery = "SELECT project_id FROM trash WHERE project_id IN (?)";
+      const projectIds = results.map(project => project.id);
 
-      db.query(insertTrashQuery, [values], (err) => {
+      db.query(checkTrashQuery, [projectIds], (err, existingTrash) => {
         if (err) {
-          return res.status(500).json({ error: "Error inserting into trash" });
+          return res.status(500).json({ error: err });
         }
-        res.status(200).json({
-          message: "Project deleted and moved to trash successfully",
-        });
+
+        // Lọc ra các project chưa có trong bảng trash
+        const existingTrashIds = new Set(existingTrash.map(row => row.project_id));
+        const newProjects = results.filter(project => !existingTrashIds.has(project.id));
+
+        if (newProjects.length > 0) {
+          const insertTrashQuery = "INSERT INTO trash (project_id, name, deleted_at, user_id) VALUES ?";
+          const values = newProjects.map((project) => [
+            project.id,
+            project.name,
+            new Date(),
+            userId,
+          ]);
+
+          db.query(insertTrashQuery, [values], (err) => {
+            if (err) {
+              return res.status(500).json({ error: "Error inserting into trash" });
+            }
+            res.status(200).json({
+              message: "Project deleted and moved to trash successfully",
+            });
+          });
+        } else {
+          res.status(200).json({
+            message: "No new projects to move to trash",
+          });
+        }
       });
     });
   });
 });
+
 
 //Endpoint để lấy danh sách file được add trong project
 app.get("/files/:userId/:projectId", (req, res) => {
@@ -931,7 +944,7 @@ app.put("/files/:id", (req, res) => {
 });
 
 // Endpoint để tải file
-app.get("/files/:id", (req, res) => {
+app.get("/download-files/:id", (req, res) => {
   const fileId = req.params.id;
 
   const query = "SELECT * FROM files WHERE id = ?";
@@ -962,6 +975,43 @@ app.get("/files/:id", (req, res) => {
       if (updateErr) throw updateErr;
       res.send(file.data);
     });
+  });
+});
+
+// Endpoint để tải file từ folder
+app.get("/folders/:folderId/files/:fileId", ensureDbConnection, (req, res) => {
+  const { folderId, fileId } = req.params;
+
+  // Thực hiện truy vấn SQL để lấy file từ folder
+  const query = "SELECT * FROM files WHERE folder_id = ? AND id = ?";
+  db.query(query, [folderId, fileId], (err, results) => {
+    if (err) {
+      console.error("Error fetching file:", err);
+      return res.status(500).json({ error: err });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const file = results[0];
+
+    // Mã hóa tên file theo RFC 5987 để xử lý ký tự đặc biệt
+    const encodeRFC5987ValueChars = (str) => {
+      return encodeURIComponent(str)
+        .replace(/['()]/g, escape) // Ép buộc các ký tự đặc biệt
+        .replace(/\*/g, "%2A")
+        .replace(/%(7C|60|5E)/g, unescape);
+    };
+
+    const encodedFileName = encodeRFC5987ValueChars(file.name);
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename*=UTF-8''${encodedFileName}`
+    );
+    res.setHeader("Content-Type", "application/octet-stream");
+
+    res.send(file.data);
   });
 });
 
@@ -1180,42 +1230,7 @@ app.put("/moveback-file/:fileId/:userId", ensureDbConnection, (req, res) => {
   });
 });
 
-// Endpoint để tải file từ folder
-app.get("/folders/:folderId/files/:fileId", ensureDbConnection, (req, res) => {
-  const { folderId, fileId } = req.params;
 
-  // Thực hiện truy vấn SQL để lấy file từ folder
-  const query = "SELECT * FROM files WHERE folder_id = ? AND id = ?";
-  db.query(query, [folderId, fileId], (err, results) => {
-    if (err) {
-      console.error("Error fetching file:", err);
-      return res.status(500).json({ error: err });
-    }
-    if (results.length === 0) {
-      return res.status(404).json({ message: "File not found" });
-    }
-
-    const file = results[0];
-
-    // Mã hóa tên file theo RFC 5987 để xử lý ký tự đặc biệt
-    const encodeRFC5987ValueChars = (str) => {
-      return encodeURIComponent(str)
-        .replace(/['()]/g, escape) // Ép buộc các ký tự đặc biệt
-        .replace(/\*/g, "%2A")
-        .replace(/%(7C|60|5E)/g, unescape);
-    };
-
-    const encodedFileName = encodeRFC5987ValueChars(file.name);
-
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename*=UTF-8''${encodedFileName}`
-    );
-    res.setHeader("Content-Type", "application/octet-stream");
-
-    res.send(file.data);
-  });
-});
 
 // Endpoint để lấy data của user
 app.get("/user-data/:userId", ensureDbConnection, (req, res) => {
