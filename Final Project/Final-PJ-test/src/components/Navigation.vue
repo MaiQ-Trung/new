@@ -102,7 +102,7 @@ onMounted(() => {
                     href="#"
                     role="menuitem"
                     @click.prevent="onLogout()"
-                    >Sign out</a
+                    >Log out</a
                   >
                 </li>
               </ul>

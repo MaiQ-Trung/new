@@ -23,7 +23,7 @@
                 class="block mr-10 text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg mb-3 text-sm px-5 py-2.5 text-center"
                 @click="togglemodalCreate"
               >
-                New Task
+                New Project
               </button>
 
               <!-- Main modal -->
@@ -268,7 +268,7 @@
               </h1>
               <button
                 type="button"
-                class="flex mx-2 p-2 h-full"
+                class="flex mx-5 p-2 h-full"
                 @click.stop="markProject(project)"
               >
                 <svg

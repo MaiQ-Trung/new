@@ -386,7 +386,7 @@ const updateItemStatusAndOrder = async () => {
 
         // Add update promise to the array
         updatePromises.push(
-          axios.put(`http://localhost:3000/update-item`, item)
+          axios.put(`http://localhost:3000/update-task`, item)
         );
       }
     });
@@ -433,7 +433,7 @@ const addItemToList = async (listIndex) => {
 // Delete item from list and database
 const deleteItem = async (item, listIndex) => {
   try {
-    await axios.delete(`http://localhost:3000/delete-item/${item.id}`);
+    await axios.delete(`http://localhost:3000/delete-task/${item.id}`);
     lists.value[listIndex].items = lists.value[listIndex].items.filter(
       (i) => i.id !== item.id
     );

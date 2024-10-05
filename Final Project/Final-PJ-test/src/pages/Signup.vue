@@ -35,7 +35,7 @@ const onSign = async () => {
   } catch (err) {
     error.value = err;
   }
-  router.push({ name: "dashboard"});
+  router.push({ name: "login"});
 };
 </script>
 

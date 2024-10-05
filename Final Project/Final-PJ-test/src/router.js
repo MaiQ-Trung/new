@@ -15,7 +15,7 @@ import FolderDetails from "@/components/FolderDetails.vue";
 
 const routes = [
   { path: "/", component: Login, meta: { auth: false } },
-  { path: "/login", component: Login, meta: { auth: false } },
+  { path: "/login", name:"login", component: Login, meta: { auth: false } },
   { path: "/signup", component: Signup, meta: { auth: false } },
   {
     path: "/main",

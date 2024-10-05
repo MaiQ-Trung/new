@@ -134,7 +134,7 @@ const handleTeamsClick = () => {
                 data-collapse-toggle="dropdown-crud"
               >
                 <i class="pi pi-cog"></i>
-                <span class="ml-3 text-base" sidebar-toggle-item>Settings</span>
+                <span class="ml-3 text-base" sidebar-toggle-item>Profile</span>
               </button>
             </li>
           </ul>

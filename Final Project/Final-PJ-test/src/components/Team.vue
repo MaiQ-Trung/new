@@ -6,7 +6,7 @@
       <header>
         <div class="flex flex-row justify-between">
           <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">
-            People and Teams
+            Teams management
           </h1>
           <div class="flex px-3 gap-2">
             <button
@@ -72,13 +72,13 @@
                         <label
                           for="name"
                           class="block my-2 text-sm font-medium text-gray-900"
-                          >Add user to team</label
+                          >Add colleague to team</label
                         >
                         <a-select
                           v-model:value="state.value"
                           mode="multiple"
                           label-in-value
-                          placeholder="Select users"
+                          placeholder="Enter email here..."
                           class="w-full"
                           :filter-option="false"
                           :not-found-content="state.fetching ? undefined : null"
@@ -117,7 +117,7 @@
               @click="toggleAdd"
               class="bg-blue-500 p-2 text-sm font-roboto text-white font-semibold rounded-md hover:bg-blue-600"
             >
-              Add person
+              Add colleague
             </button>
           </div>
           <!-- Modal add user -->
@@ -206,13 +206,13 @@
           v-model="filters"
           class="border-b-2 bg-slate-50 p-2 w-full my-3 border-gray-500 focus:outline-none focus:border-b-blue-500 hover:border-b-blue-500"
           type="text"
-          placeholder="Search for people and teams"
+          placeholder="Search colleagues and teams here..."
         />
       </header>
       <main>
         <div class="grid grid-rows-2 gap-4 mt-5">
           <div class="flex flex-col">
-            <h1>People</h1>
+            <h1>Colleagues</h1>
             <div class="flex flex-row p-3 gap-4 max-w-[1232px] overflow-auto">
               <div
                 v-for="person in filteredPeople"

@@ -24,24 +24,6 @@ const secretKey =
 app.use(bodyParser.json());
 app.use(cors());
 
-// const deleteOldProjects = () => {
-//   const deleteQuery =
-//     "DELETE FROM trash WHERE deleted_at < NOW() - INTERVAL 1 MINUTE";
-//   db.query(deleteQuery, (err, results) => {
-//     if (err) {
-//       console.error("Error deleting old projects from trash:", err);
-//     } else {
-//       console.log("Old projects deleted from trash:", results.affectedRows);
-//     }
-//   });
-// };
-
-// // Thiết lập cron job để chạy mỗi giờ
-// cron.schedule("* * * * *", () => {
-//   console.log("Running cron job to delete old projects from trash");
-//   deleteOldProjects();
-// });
-
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -326,7 +308,7 @@ app.get("/projects/:projectId/tasks", ensureDbConnection, (req, res) => {
   //select count theo status của task, có bao nhiêu task status là to do, in progress, done
   const sql = `
         SELECT COUNT(*) AS count, status
-        FROM todolist
+        FROM tasks
         WHERE project_id = ?
         GROUP BY status
       `;
@@ -506,7 +488,7 @@ app.delete("/delete-signed/:id/:projectId", ensureDbConnection, (req, res) => {
 app.get("/todo/:projectId", ensureDbConnection, (req, res) => {
   const { projectId } = req.params;
 
-  const query = `SELECT t.id, t.name, t.status, t.order_index FROM todolist t INNER JOIN projects p ON t.project_id = p.id WHERE p.id = ?`;
+  const query = `SELECT t.id, t.name, t.status, t.order_index FROM tasks t INNER JOIN projects p ON t.project_id = p.id WHERE p.id = ?`;
 
   db.query(query, [projectId], (err, results) => {
     if (err) {
@@ -533,7 +515,7 @@ app.post("/add-task", ensureDbConnection, (req, res) => {
   const projectId = req.body.project_id;
   console.log("projectId", projectId);
   // Truy vấn để lấy ID cao nhất hiện có
-  const getMaxIdQuery = "SELECT MAX(id) AS maxId FROM todolist";
+  const getMaxIdQuery = "SELECT MAX(id) AS maxId FROM tasks";
   db.query(getMaxIdQuery, (err, results) => {
     if (err) {
       return res.status(500).json({ error: err });
@@ -544,7 +526,7 @@ app.post("/add-task", ensureDbConnection, (req, res) => {
 
     // Thêm item mới với ID mới
     const addItemQuery =
-      "INSERT INTO todolist (id, name, status, project_id) VALUES (?, ?, ?, ?)";
+      "INSERT INTO tasks (id, name, status, project_id) VALUES (?, ?, ?, ?)";
     db.query(addItemQuery, [newId, name, status, projectId], (err, result) => {
       if (err) {
         return res.status(500).json({ error: err });
@@ -562,7 +544,7 @@ app.post("/add-task", ensureDbConnection, (req, res) => {
 app.delete("/delete-task/:id", ensureDbConnection, (req, res) => {
   const { id } = req.params;
 
-  const query = "DELETE FROM todolist WHERE id = ?";
+  const query = "DELETE FROM tasks WHERE id = ?";
   db.query(query, [id], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err });
@@ -578,7 +560,7 @@ app.delete("/delete-task/:id", ensureDbConnection, (req, res) => {
 app.put("/update-task", ensureDbConnection, (req, res) => {
   const { id, status, order_index } = req.body;
 
-  const query = "UPDATE todolist SET status = ?, order_index = ? WHERE id = ?";
+  const query = "UPDATE tasks SET status = ?, order_index = ? WHERE id = ?";
   db.query(query, [status, order_index, id], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err });
