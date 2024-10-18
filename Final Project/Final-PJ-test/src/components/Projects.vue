@@ -25,7 +25,6 @@
               >
                 New Project
               </button>
-
               <!-- Main modal -->
               <div
                 id="crud-modal"
@@ -119,16 +118,8 @@
                 <div
                   class="flex flex-row gap-4 overflow-x-auto min-w-[1247px] max-w-6xl"
                 >
-                  <!-- Skeleton screen for loading state -->
-                  <div v-if="loading" class="skeleton-card">
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-text"></div>
-                    <div class="skeleton skeleton-text"></div>
-                  </div>
-
-                  <!-- Actual project list when data is available -->
                   <a
-                    v-for="(project, index) in projects"
+                    v-for="(project, index) in filteredProjects"
                     :key="index"
                     @click="handleProjectitemClick(project.id)"
                     class="cursor-pointer items-start py-1 h-[200px] min-w-64 max-w-64 bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg hover:border-gray-300"
@@ -699,31 +690,6 @@ onMounted(() => {
 </script>
 
 <style>
-.skeleton {
-  background: #e0e0e0;
-  border-radius: 4px;
-  margin: 8px 0;
-}
-
-.skeleton-text {
-  height: 20px;
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.skeleton-title {
-  height: 30px;
-  width: 60%;
-  margin-bottom: 10px;
-}
-
-.skeleton-card {
-  padding: 16px;
-  width: 300px;
-  margin: 16px;
-  background: #f0f0f0;
-  border-radius: 8px;
-}
 .p-multiselect-list-container {
   padding: 10px;
 }

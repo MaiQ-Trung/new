@@ -5,7 +5,16 @@ const multer = require("multer");
 const mime = require("mime-types");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const cron = require("node-cron");
+const fs = require("fs");
+
+let imgData;
+fs.readFile("images.png", (err, data) => {
+  if (err) {
+    console.error("Error reading file:", err);
+    return;
+  }
+  imgData = data; // Lưu dữ liệu ảnh vào biến imgData
+});
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -39,7 +48,6 @@ db.connect((err) => {
   }
 });
 
-// Middleware để xác nhận kết nối MySQL trước khi xử lý yêu cầu
 const ensureDbConnection = (req, res, next) => {
   if (!db || !db.config.connectTimeout) {
     return res
@@ -75,12 +83,18 @@ app.post("/login", (req, res) => {
     res.status(200).json({ token, userId, email });
   });
 });
-// Endpoint đăng ký
+
 app.post("/signup", (req, res) => {
   const { email, password } = req.body;
 
-  const query = "INSERT INTO users (email, password) VALUES (?, ?)";
-  db.query(query, [email, password], (err, result) => {
+  // Kiểm tra nếu imgData đã được đọc
+  if (!imgData) {
+    return res.status(500).json({ error: "Image data not available." });
+  }
+
+  const query =
+    "INSERT INTO users (email, password, profile_picture) VALUES (?, ?, ?)";
+  db.query(query, [email, password, imgData], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err });
     }
@@ -201,15 +215,17 @@ app.put("/delete-project/:id/:userId", ensureDbConnection, (req, res) => {
     }
 
     // Thực hiện truy vấn SQL để lấy project từ bảng projects có user_id = null
-    const selectProjectsQuery = "SELECT id, name FROM projects WHERE user_id IS NULL";
+    const selectProjectsQuery =
+      "SELECT id, name FROM projects WHERE user_id IS NULL";
     db.query(selectProjectsQuery, (err, results) => {
       if (err) {
         return res.status(500).json({ error: err });
       }
 
       // Kiểm tra xem các project đã tồn tại trong bảng trash chưa
-      const checkTrashQuery = "SELECT project_id FROM trash WHERE project_id IN (?)";
-      const projectIds = results.map(project => project.id);
+      const checkTrashQuery =
+        "SELECT project_id FROM trash WHERE project_id IN (?)";
+      const projectIds = results.map((project) => project.id);
 
       db.query(checkTrashQuery, [projectIds], (err, existingTrash) => {
         if (err) {
@@ -217,11 +233,16 @@ app.put("/delete-project/:id/:userId", ensureDbConnection, (req, res) => {
         }
 
         // Lọc ra các project chưa có trong bảng trash
-        const existingTrashIds = new Set(existingTrash.map(row => row.project_id));
-        const newProjects = results.filter(project => !existingTrashIds.has(project.id));
+        const existingTrashIds = new Set(
+          existingTrash.map((row) => row.project_id)
+        );
+        const newProjects = results.filter(
+          (project) => !existingTrashIds.has(project.id)
+        );
 
         if (newProjects.length > 0) {
-          const insertTrashQuery = "INSERT INTO trash (project_id, name, deleted_at, user_id) VALUES ?";
+          const insertTrashQuery =
+            "INSERT INTO trash (project_id, name, deleted_at, user_id) VALUES ?";
           const values = newProjects.map((project) => [
             project.id,
             project.name,
@@ -231,7 +252,9 @@ app.put("/delete-project/:id/:userId", ensureDbConnection, (req, res) => {
 
           db.query(insertTrashQuery, [values], (err) => {
             if (err) {
-              return res.status(500).json({ error: "Error inserting into trash" });
+              return res
+                .status(500)
+                .json({ error: "Error inserting into trash" });
             }
             res.status(200).json({
               message: "Project deleted and moved to trash successfully",
@@ -246,7 +269,6 @@ app.put("/delete-project/:id/:userId", ensureDbConnection, (req, res) => {
     });
   });
 });
-
 
 //Endpoint để lấy danh sách file được add trong project
 app.get("/files/:userId/:projectId", (req, res) => {
@@ -277,7 +299,7 @@ app.put("/add-files/:id/:projectId", ensureDbConnection, (req, res) => {
 
 // Endpoint để xóa file khỏi project
 app.put("/remove-file/:id", ensureDbConnection, (req, res) => {
-  const { id } = req.params.id;
+  const { id } = req.params;
   const query = "UPDATE files SET project_id = NULL WHERE id = ?";
   db.query(query, [id], (err, result) => {
     if (err) {
@@ -604,13 +626,17 @@ app.put("/restore-project/:id/:userId", ensureDbConnection, (req, res) => {
           .status(404)
           .json({ error: "Project not found or not active" });
       }
-      const projectId = results[0].project_id;
-      const updateProjectQuery = "UPDATE projects SET user_id = ? WHERE id = ?";
-      db.query(updateProjectQuery, [userId, projectId], (err) => {
-        if (err) {
-          return res.status(500).json({ error: err });
-        }
-        res.status(200).json({ message: "Project restored successfully" });
+      const deleteProjectQuery = "DELETE FROM trash WHERE status = 'active'";
+      db.query(deleteProjectQuery, (err) => {
+        const projectId = results[0].project_id;
+        const updateProjectQuery =
+          "UPDATE projects SET user_id = ? WHERE id = ?";
+        db.query(updateProjectQuery, [userId, projectId], (err) => {
+          if (err) {
+            return res.status(500).json({ error: err });
+          }
+          res.status(200).json({ message: "Project restored successfully" });
+        });
       });
     });
   });
@@ -1211,8 +1237,6 @@ app.put("/moveback-file/:fileId/:userId", ensureDbConnection, (req, res) => {
     res.status(200).json({ message: "File removed successfully" });
   });
 });
-
-
 
 // Endpoint để lấy data của user
 app.get("/user-data/:userId", ensureDbConnection, (req, res) => {

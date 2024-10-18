@@ -5,6 +5,14 @@
         id="main-content"
         class="relative w-full h-screen overflow-y-auto bg-gray-50"
       >
+        <Transition>
+          <div
+            v-if="success"
+            class="fixed top-20 right-10 w-60 p-2 flex items-center justify-center h-10 text-green-500 bg-white shadow-md rounded-lg"
+          >
+            <p>{{ success }}</p>
+          </div>
+        </Transition>
         <main>
           <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4">
             <div class="mb-4 col-span-full xl:mb-2">
@@ -27,6 +35,9 @@
                     :src="avatarUrl"
                     class="mb-4 rounded-lg w-40 h-36 sm:mb-0 xl:mb-4 2xl:mb-0"
                   />
+                  <span v-if="error" class="text-red-500 text-sm">{{
+                    error
+                  }}</span>
                   <div>
                     <input
                       type="file"
@@ -254,6 +265,8 @@ const store = useStore();
 const avatarUrl = ref("");
 const fileInput = ref(null);
 const showChangePasswordModal = ref(false);
+const error = ref("");
+const success = ref("");
 
 const passwordData = ref({
   currentPassword: "",
@@ -287,7 +300,8 @@ const handleFileUpload = async (event) => {
   // Kiểm tra định dạng file
   const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
   if (!validImageTypes.includes(file.type)) {
-    console.error("Invalid file type. Only JPEG, PNG and GIF are allowed.");
+    error.value =
+      "Invalid file type. Only JPEG, PNG, and GIF files are allowed.";
     return;
   }
 
@@ -305,7 +319,7 @@ const handleFileUpload = async (event) => {
       }
     );
     console.log("Avatar uploaded successfully");
-    fetchAvatar();
+    window.location.reload();
   } catch (error) {
     console.error("Error uploading avatar:", error);
     console.log("Failed to upload avatar");
@@ -398,7 +412,10 @@ const changePassword = async () => {
     });
     console.log("Password changed successfully");
     toggleChangePasswordModal();
-    fetchUserData();
+    success.value = "Password changed successfully";
+    setTimeout(() => {
+      success.value = "";
+    }, 3000);
   } catch (error) {
     if (error.response && error.response.data) {
       const { error: errorMessage } = error.response.data;

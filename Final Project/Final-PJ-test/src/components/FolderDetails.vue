@@ -62,7 +62,7 @@
                 <i :class="getFileIcon(item.name)" class="mr-2 text-lg"></i>
                 <span
                   @click="startEditing(item)"
-                  class="text-gray-800 text-base font-roboto font-semibold"
+                  class="text-gray-800 text-base font-roboto "
                   v-if="editingFileId !== item.id"
                   >{{ item.name }}</span
                 >
@@ -76,7 +76,7 @@
                 />
               </td>
               <td
-                class="py-2 ml-48 text-gray-800 text-base font-roboto font-semibold"
+                class="py-2 ml-48 text-gray-800 text-base font-roboto "
               >
                 {{ new Date(item.updated_at).toLocaleString() }}
               </td>

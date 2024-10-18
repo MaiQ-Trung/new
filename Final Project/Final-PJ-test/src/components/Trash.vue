@@ -19,12 +19,12 @@
             class="relative grid grid-cols-3 px-4 py-2 border-b border-gray-500 hover:bg-gray-300 duration-100 cursor-pointer"
           >
             <td class="py-2">
-              <span class="text-gray-800 text-base font-roboto font-semibold">
+              <span class="text-gray-800 font-roboto">
                 {{ item.name }}
               </span>
             </td>
             <td
-              class="py-2 ml-48 text-gray-800 text-base font-roboto font-semibold"
+              class="py-2 ml-48 text-gray-800 font-roboto"
             >
               {{ new Date(item.deleted_at).toLocaleString() }}
             </td>

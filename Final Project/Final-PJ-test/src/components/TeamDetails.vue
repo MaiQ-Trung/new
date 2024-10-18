@@ -51,8 +51,10 @@
               <h3 class="font-semibold text-gray-900">
                 {{ project.name }}
               </h3>
-              <p class="text-gray-500 text-sm">
-                Created at: {{ project.createdAt }}
+              <p class="text-gray-500 text-sm font-semibold">
+                {{ new Date(project.startDate).toLocaleDateString() }} -{{
+                  new Date(project.endDate).toLocaleDateString()
+                }}
               </p>
             </div>
           </div>
@@ -85,7 +87,8 @@ const fetchSignedProject = async () => {
         id: project.id,
         name: project.name,
         userId: project.user_id,
-        createdAt: project.created_at,
+        startDate: project.start_date,
+        endDate: project.end_date,
       };
     });
     console.log("Signed projects fetched successfully", signedProjects.value);

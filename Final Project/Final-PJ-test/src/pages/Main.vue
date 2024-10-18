@@ -14,7 +14,9 @@ const showComponent = (component, userId = null) => {
 </script>
 
 <template>
-  <Navigation />
+  <Navigation 
+  @profile-click="() => showComponent('Settings')"
+  />
   <div class="flex">
     <!-- Add the sidebar here -->
     <Sidebar
@@ -23,7 +25,6 @@ const showComponent = (component, userId = null) => {
       @calendar-click="() => showComponent('Calendar')"
       @teams-click="() => showComponent('Teams')"
       @docs-click="() => showComponent('Docs')"
-      @settings-click="() => showComponent('Settings')"
       @trash-click="() => showComponent('Trash')"      
     />
     <!-- Main -->

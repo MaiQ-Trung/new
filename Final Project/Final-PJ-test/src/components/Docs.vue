@@ -108,7 +108,7 @@
               <i :class="getFileIcon(item.name)" class="mr-2 text-lg"></i>
               <span
                 @click="startEditing(item)"
-                class="text-gray-800 text-base font-roboto font-semibold"
+                class="text-gray-800 font-roboto"
                 v-if="editingFileId !== item.id"
                 >{{ item.name }}</span
               >
@@ -122,7 +122,7 @@
               />
             </td>
             <td
-              class="py-2 ml-48 text-gray-800 text-base font-roboto font-semibold"
+              class="py-2 ml-48 text-gray-800 font-roboto"
             >
               {{ new Date(item.updated_at).toLocaleString() }}
             </td>
@@ -350,7 +350,7 @@ const cancelModal = () => {
 const uploadFile = async () => {
   if (selectedFile.value) {
     const formData = new FormData();
-    formData.append("file", selectedFile.value);
+    formData.append("file", selectedFile.value);// Đưa file vào FormData
 
     try {
       const response = await axios.post(
@@ -358,13 +358,13 @@ const uploadFile = async () => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data", // Đặt Content-Type để server hiểu đây là form data
           },
         }
       );
       console.log("File uploaded successfully:", response.data);
-      fetchFilesAndFolders(); // Reload files and folders after uploading
-      selectedFile.value = null; // Reset selected file after upload
+      fetchFilesAndFolders(); // Tải lại danh sách file sau khi upload
+      selectedFile.value = null; //Xoa file da chon sau khi tai xong
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -372,7 +372,7 @@ const uploadFile = async () => {
 };
 
 const triggerFileInput = () => {
-  fileInput.value.click();
+  fileInput.value.click(); 
 };
 
 const fetchFilesAndFolders = async () => {
@@ -408,17 +408,16 @@ const deleteItem = async (itemId) => {
 const downloadFile = async (fileId, fileName) => {
   try {
     const response = await axios.get(`http://localhost:3000/download-files/${fileId}`, {
-      responseType: "blob", // Important: return data as blob
+      responseType: "blob", // yêu cầu dữ liệu trả về dưới dạng blob
     });
-
+    // gán dữ liệu blob vào URL để tạo link download
     const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
+    const link = document.createElement("a"); 
     link.href = url;
-    link.setAttribute("download", fileName); // File name when downloading
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-
+    document.body.removeChild(link); // Xóa link sau khi download
     fetchFilesAndFolders();
   } catch (error) {
     console.error("Error downloading file:", error);

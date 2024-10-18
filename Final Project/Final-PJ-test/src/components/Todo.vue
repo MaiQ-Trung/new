@@ -30,7 +30,7 @@
                   @click.prevent="setSelectedNavItem('List')"
                   class="block pb-2"
                 >
-                  List
+                  Tasks
                 </a>
               </li>
               <li :class="{ 'text-blue-500': selectedNavItem === 'Docs' }">
@@ -39,7 +39,7 @@
                   @click.prevent="setSelectedNavItem('Docs')"
                   class="block pb-2"
                 >
-                  Docs
+                  Files
                 </a>
               </li>
             </ul>
@@ -74,7 +74,9 @@
             getColumnClass(list.title),
           ]"
         >
-          <div class="kanban-column-header [text-shadow:_0_2px_0_rgb(0_0_0_/_10%)] text-white font-semibold flex justify-between mb-3">
+          <div
+            class="kanban-column-header [text-shadow:_0_2px_0_rgb(0_0_0_/_10%)] text-white font-semibold flex justify-between mb-3"
+          >
             <h2>{{ list.title }}</h2>
             <button @click="addNewItem(index)">Add New Task</button>
           </div>
@@ -139,7 +141,7 @@
       </div>
       <div v-else>
         <h2 class="text-lg p-2 text-gray-800 font-semibold font-roboto">
-          Docs added
+          Files attached
         </h2>
       </div>
       <hr class="w-svw h-0.5 bg-gray-300" />
@@ -180,24 +182,40 @@
               >
                 {{ file.name }}
               </button>
-              <div v-else class="flex w-full text-lg text-gray-700 font-semibold underline p-2 rounded-lg justify-center mt-4">No file to attach.</div>
+              <div
+                v-else
+                class="flex w-full text-lg text-gray-700 font-semibold underline p-2 rounded-lg justify-center mt-4"
+              >
+                No file to attach.
+              </div>
             </div>
           </div>
           <hr class="h-0.5 w-full bg-gray-300" />
-          <ul class="px-0.5 py-2">
+          <ul class="px-0.5 py-1">
             <li
               v-for="file in filteredAttachFiles"
               v-if="attachfiles.length > 0"
               :key="file.id"
-              class="flex items-center text-gray-800 font-medium justify-between p-2.5 cursor-pointer hover:bg-gray-300 rounded-lg animate-dropdown"
+              class="flex items-center text-gray-800 font-medium justify-between px-2 cursor-pointer rounded-lg animate-dropdown group"
               @click="displayFileDetails(file)"
             >
               <span>
                 <i :class="getFileIcon(file.name)" class="mr-2 text-lg"></i>
                 {{ file.name }}
               </span>
+              <button
+                class="flex items-center justify-center rounded-lg hover:bg-slate-300 duration-200 w-10 h-10 opacity-0 group-hover:opacity-100"
+                @click.stop="removeAttachedFile(file)"
+              >
+                <i class="pi pi-times" />
+              </button>
             </li>
-            <div v-else class="flex w-full text-lg text-gray-700 font-semibold underline p-2 rounded-lg justify-center mt-36">No file attached.</div>
+            <div
+              v-else
+              class="flex w-full text-lg text-gray-700 font-semibold underline p-2 rounded-lg justify-center mt-36"
+            >
+              No file attached.
+            </div>
           </ul>
         </div>
         <!-- Files details -->
@@ -249,6 +267,7 @@ const attachfiles = ref([]);
 const showMenu = ref(false);
 const selectedFileId = ref(null);
 
+
 const lists = ref([
   { title: "To Do", items: [] },
   { title: "In Progress", items: [] },
@@ -298,7 +317,7 @@ const fetchFiles = async () => {
   const userId = store.state.auth.userId;
   try {
     const query = await axios.get(`http://localhost:3000/all-files/${userId}`);
-    if(query.data.length === 0) {
+    if (query.data.length === 0) {
       console.log("Files", query.data);
     }
     files.value = query.data;
@@ -355,6 +374,16 @@ const fetchAttachedFiles = async () => {
   }
 };
 
+//api to remove attached file by project id
+const removeAttachedFile = async (file) => {
+  try {
+    await axios.put(`http://localhost:3000/remove-file/${file.id}`);
+    fetchAttachedFiles();
+  } catch (error) {
+    console.error("Error removing file:", error);
+  }
+};
+
 const fetchData = async () => {
   const projectId = route.params.projectId;
   try {
@@ -380,7 +409,10 @@ const updateItemStatusAndOrder = async () => {
 
   lists.value.forEach((list) => {
     list.items.forEach((item, index) => {
-      if (item.status !== list.title.toLowerCase() || item.order_index !== index) {
+      if (
+        item.status !== list.title.toLowerCase() ||
+        item.order_index !== index
+      ) {
         item.status = list.title.toLowerCase();
         item.order_index = index;
 
@@ -400,15 +432,13 @@ const handleDrop = async () => {
   await updateItemStatusAndOrder();
 };
 
-
 const addNewItem = (listIndex) => {
   newItem.value = true;
   newItemList.value = listIndex;
   newItemText.value = "";
 };
 
-//api để add file vào project
-
+//api để add thêm task
 const addItemToList = async (listIndex) => {
   if (newItemText.value.trim()) {
     const newItemObj = {
@@ -430,14 +460,15 @@ const addItemToList = async (listIndex) => {
     newItemList.value = null;
   }
 };
-// Delete item from list and database
+
+// Delete task from list and database
 const deleteItem = async (item, listIndex) => {
   try {
     await axios.delete(`http://localhost:3000/delete-task/${item.id}`);
     lists.value[listIndex].items = lists.value[listIndex].items.filter(
       (i) => i.id !== item.id
     );
-  } catch (error) { 
+  } catch (error) {
     console.error("Error deleting item:", error);
   }
 };
@@ -476,35 +507,35 @@ const displayFileDetails = async (file) => {
 };
 
 const getFileIcon = (fileName) => {
-  const extension = fileName.split('.').pop().toLowerCase();
+  const extension = fileName.split(".").pop().toLowerCase();
   switch (extension) {
-    case 'pdf':
-      return 'pi pi-file-pdf';
-    case 'doc':
-    case 'docx':
-      return 'pi pi-file-word';
-    case 'xls':
-    case 'xlsx':
-      return 'pi pi-file-excel';
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'gif':
-    case 'svg':
-    case'webp':
-    case 'gif':
-      return 'pi pi-image';
-    case 'zip':
-    case 'rar':
-      return 'pi pi-server';
-    case 'txt':
-      return 'pi pi-file';
-    case 'mp4':
-    case 'avi':
-    case 'mkv':
-      return 'pi pi-video';
+    case "pdf":
+      return "pi pi-file-pdf";
+    case "doc":
+    case "docx":
+      return "pi pi-file-word";
+    case "xls":
+    case "xlsx":
+      return "pi pi-file-excel";
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "svg":
+    case "webp":
+    case "gif":
+      return "pi pi-image";
+    case "zip":
+    case "rar":
+      return "pi pi-server";
+    case "txt":
+      return "pi pi-file";
+    case "mp4":
+    case "avi":
+    case "mkv":
+      return "pi pi-video";
     default:
-      return 'pi pi-folder';
+      return "pi pi-folder";
   }
 };
 

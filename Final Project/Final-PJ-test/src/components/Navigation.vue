@@ -10,6 +10,12 @@ const settings = ref(false);
 const email = ref("");
 const avatar = ref("");
 
+const emit = defineEmits(["profile-click"]);
+
+const handleProfileClick = () => {
+  emit("profile-click");
+};
+
 const onLogout = async () => {
   await store.dispatch(`auth/${LOGOUT_ACTION}`);
   settings.value = false;
@@ -19,7 +25,6 @@ const onLogout = async () => {
 const fetchUserData = async () => {
   watchEffect(async () => {
     const userId = store.state.auth.userId;
-
     if (userId) {
       try {
         const res = await axios.get(`http://localhost:3000/users/${userId}`);
@@ -43,7 +48,7 @@ onMounted(() => {
 
 <template>
   <nav
-    class="relative w-full bg-gradient-to-r from-sky-500 to-purple-500 border-b border-gray-300"
+    class="relative w-full bg-gradient-to-r from-emerald-500 from-70% to-sky-500 border-b border-gray-300"
     @click="settings = false"
   >
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
@@ -96,12 +101,19 @@ onMounted(() => {
                 </p>
               </div>
               <ul class="py-1">
-                <li class="flex flex-row px-4 py-2 items-center gap-2 cursor-pointer font-mono text-gray-700 hover:bg-red-500 hover:text-white duration-150 ease-in-out rounded-lg">
+                <li
+                  class="flex flex-row px-4 py-2 items-center gap-2 cursor-pointer font-mono text-gray-700 hover:bg-slate-300 hover:text-white duration-150 ease-in-out rounded-lg"
+                >
+                  <i class="pi pi-user"></i>
+                  <a href="#" role="menuitem" @click="handleProfileClick"
+                    >Profile</a
+                  >
+                </li>
+                <li
+                  class="flex flex-row px-4 py-2 items-center gap-2 cursor-pointer font-mono text-gray-700 hover:bg-red-500 hover:text-white duration-150 ease-in-out rounded-lg"
+                >
                   <i class="pi pi-sign-out"></i>
-                  <a
-                    href="#"
-                    role="menuitem"
-                    @click.prevent="onLogout()"
+                  <a href="#" role="menuitem" @click.prevent="onLogout()"
                     >Log out</a
                   >
                 </li>

@@ -5,7 +5,6 @@ const emit = defineEmits([
   "projects-click",
   "calendar-click",
   "docs-click",
-  "settings-click",
   "trash-click",
   "teams-click",
 ]);
@@ -22,9 +21,6 @@ const handleCalendarClick = () => {
 };
 const handleDocsClick = () => {
   emit("docs-click");
-};
-const handleSettingsClick = () => {
-  emit("settings-click");
 };
 const handleTrashClick = () => {
   emit("trash-click");
@@ -97,7 +93,7 @@ const handleTeamsClick = () => {
               aria-controls="dropdown-crud"
               data-collapse-toggle="dropdown-crud"
             >
-            <i class="pi pi-user"></i>
+            <i class="pi pi-users"></i>
               <span class="ml-3 text-base" sidebar-toggle-item>Teams</span>
             </button>
             <!-- Docs -->
@@ -122,19 +118,6 @@ const handleTeamsClick = () => {
               >
               <i class="pi pi-trash"></i>
                 <span class="ml-3 text-base" sidebar-toggle-item>Trash</span>
-              </button>
-            </li>
-            <!-- Settings -->
-            <li>
-              <button
-                type="button"
-                @click="handleSettingsClick"
-                class="flex items-center w-full p-2 text-xl text-gray-900 transition duration-75 hover:text-white rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-controls="dropdown-crud"
-                data-collapse-toggle="dropdown-crud"
-              >
-                <i class="pi pi-cog"></i>
-                <span class="ml-3 text-base" sidebar-toggle-item>Profile</span>
               </button>
             </li>
           </ul>
